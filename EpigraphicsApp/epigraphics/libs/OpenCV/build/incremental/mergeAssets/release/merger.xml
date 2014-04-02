@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merger>
+
+    <dataSet config="main" >
+        <source path="/home/owen/Dropbox/MIT/Classes/21W.789/project/epigraphics/EpigraphicsApp/epigraphics/libs/OpenCV/assets" />
+    </dataSet>
+    <dataSet config="release" >
+        <source path="/home/owen/Dropbox/MIT/Classes/21W.789/project/epigraphics/EpigraphicsApp/epigraphics/libs/OpenCV/src/release/assets" />
+    </dataSet>
+
+</merger>

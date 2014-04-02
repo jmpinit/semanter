@@ -1,0 +1,4 @@
+<!-- From: file:/home/owen/Dropbox/MIT/Classes/21W.789/project/epigraphics/EpigraphicsApp/epigraphics/libs/OpenCV/AndroidManifest.xml --><manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="2480" android:versionName="2.4.8" package="org.opencv">
+
+    <uses-sdk android:minSdkVersion="15" android:targetSdkVersion="19"/>
+</manifest>
