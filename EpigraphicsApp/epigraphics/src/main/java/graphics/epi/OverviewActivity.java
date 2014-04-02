@@ -33,6 +33,14 @@ import org.opencv.android.OpenCVLoader;
 import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
 
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Future;
+import java.util.concurrent.RunnableFuture;
+
+import graphics.epi.vision.OpThreshold;
+import graphics.epi.vision.VisionExecutor;
+
 import static org.opencv.android.Utils.bitmapToMat;
 import static org.opencv.android.Utils.matToBitmap;
 import static org.opencv.imgproc.Imgproc.cvtColor;
@@ -40,6 +48,8 @@ import static org.opencv.imgproc.Imgproc.threshold;
 
 public class OverviewActivity extends ActionBarActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
+
+    static final String TAG = "epigraphics";
 
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
@@ -207,25 +217,25 @@ public class OverviewActivity extends ActionBarActivity
                         ImageView rawView = (ImageView)rootView.findViewById(R.id.img_raw);
                         rawView.setImageBitmap(yourSelectedImage);
 
-                        // image into OpenCV
-                        Mat imageMat = new Mat();
-                        bitmapToMat(yourSelectedImage, imageMat);
+                        // launch async vision task
+                        Log.d(TAG, "launching vision task");
+                        Executor executor = new VisionExecutor();
+                        RunnableFuture task = new OpThreshold(yourSelectedImage);
+                        executor.execute(task);
+                        Log.d(TAG, "launched vision task");
 
-                        // grayscale image
-                        Mat grayMat = new Mat();
-                        cvtColor(imageMat, grayMat, Imgproc.COLOR_RGB2GRAY);
+                        try {
+                            Bitmap resultImage = (Bitmap) task.get();
+                            Log.d(TAG, "got result");
 
-                        // threshold image
-                        Mat threshMat = new Mat();
-                        threshold(grayMat, threshMat, 128, 255, Imgproc.THRESH_BINARY);
-
-                        // image out of OpenCV
-                        Bitmap resultImage = Bitmap.createBitmap(yourSelectedImage);
-                        matToBitmap(threshMat, resultImage);
-
-                        // display result
-                        ImageView resultView = (ImageView)rootView.findViewById(R.id.img_result);
-                        resultView.setImageBitmap(resultImage);
+                            // display result
+                            ImageView resultView = (ImageView) rootView.findViewById(R.id.img_result);
+                            resultView.setImageBitmap(resultImage);
+                        } catch(InterruptedException e) {
+                            Log.e(TAG, Log.getStackTraceString(e));
+                        } catch(ExecutionException e) {
+                            Log.e(TAG, Log.getStackTraceString(e));
+                        }
                     }
             }
         }
@@ -237,7 +247,7 @@ public class OverviewActivity extends ActionBarActivity
             switch (status) {
                 case LoaderCallbackInterface.SUCCESS:
                 {
-                    Log.i("epigraphics", "OpenCV loaded successfully");
+                    Log.i(TAG, "OpenCV loaded successfully");
                     //mOpenCvCameraView.enableView();
                 } break;
                 default:
@@ -251,7 +261,7 @@ public class OverviewActivity extends ActionBarActivity
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent imageReturnedIntent) {
         // http://stackoverflow.com/a/6147919
-        Log.d("epigraphics", "Activity sees result.");
+        Log.d(TAG, "Activity sees result.");
         super.onActivityResult(requestCode, resultCode, imageReturnedIntent);
     }
 
