@@ -1,6 +1,6 @@
 /*
  * This file is auto-generated.  DO NOT MODIFY.
- * Original file: /home/owen/Dropbox/MIT/Classes/21W.789/project/epigraphics/EpigraphicsApp/epigraphics/libs/OpenCV/src/org/opencv/engine/OpenCVEngineInterface.aidl
+ * Original file: /Users/rhristov/epic/EpigraphicsApp/epigraphics/libs/OpenCV/src/org/opencv/engine/OpenCVEngineInterface.aidl
  */
 package org.opencv.engine;
 /**

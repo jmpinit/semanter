@@ -1,30 +1,31 @@
 package graphics.epi;
 
 import android.app.Activity;
-import android.support.v7.app.ActionBarActivity;
-import android.support.v7.app.ActionBar;
+import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.content.Context;
-import android.os.Build;
-import android.os.Bundle;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.support.v4.widget.DrawerLayout;
-import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 
+import java.util.ArrayList;
+
+import graphics.epi.filesystemtree.Folder;
+import graphics.epi.filesystemtree.Items;
+
 public class OverviewActivity extends ActionBarActivity
-        implements NavigationDrawerFragment.NavigationDrawerCallbacks {
+        implements NavigationDrawerFragment.NavigationDrawerCallbacks, FileSystem.FileSystemCallbacks {
 
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
@@ -53,11 +54,34 @@ public class OverviewActivity extends ActionBarActivity
 
     @Override
     public void onNavigationDrawerItemSelected(int position) {
+        ArrayList<String> demoArray = new ArrayList<String>();
+        demoArray.add("test.txt");
+        demoArray.add("18.06/test.txt");
+
         // update the main content by replacing fragments
         FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction()
-                .replace(R.id.container, PlaceholderFragment.newInstance(position + 1))
-                .commit();
+        if (position == 2) {
+            fragmentManager.beginTransaction()
+                    .replace(R.id.container, FileSystem.newInstance(new Folder(null, demoArray)))
+                    .commit();
+        } else {
+            fragmentManager.beginTransaction()
+                    .replace(R.id.container, PlaceholderFragment.newInstance(position + 1))
+                    .commit();
+        }
+    }
+
+    @Override
+    public void fileSystemInteraction(Items next) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        if (next.isFile()) {
+            //handle file
+            System.out.println(next.toString());
+        } else {
+            fragmentManager.beginTransaction()
+                    .replace(R.id.container, FileSystem.newInstance((Folder) next))
+                    .commit();
+        }
     }
 
     public void onSectionAttached(int number) {
