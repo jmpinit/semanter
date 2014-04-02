@@ -1,6 +1,12 @@
 package graphics.epi;
 
 import android.app.Activity;
+import android.content.Intent;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.provider.MediaStore;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
@@ -17,6 +23,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.support.v4.widget.DrawerLayout;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.opencv.android.BaseLoaderCallback;
@@ -117,6 +125,8 @@ public class OverviewActivity extends ActionBarActivity
          */
         private static final String ARG_SECTION_NUMBER = "section_number";
 
+        private View rootView;
+
         /**
          * Returns a new instance of this fragment for the given section
          * number.
@@ -133,19 +143,66 @@ public class OverviewActivity extends ActionBarActivity
         }
 
         @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_overview, container, false);
+        public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+            rootView = inflater.inflate(R.layout.fragment_overview, container, false);
+
+            // display which section this is
             TextView textView = (TextView) rootView.findViewById(R.id.section_label);
             textView.setText(Integer.toString(getArguments().getInt(ARG_SECTION_NUMBER)));
+
+            // FIXME
+            final Button button = (Button)rootView.findViewById(R.id.btn_pick);
+            button.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    final int SELECT_PHOTO = 100;
+
+                    Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
+                    photoPickerIntent.setType("image/*");
+                    startActivityForResult(photoPickerIntent, SELECT_PHOTO);
+                }
+            });
+
             return rootView;
         }
 
         @Override
         public void onAttach(Activity activity) {
             super.onAttach(activity);
+
             ((OverviewActivity) activity).onSectionAttached(
-                    getArguments().getInt(ARG_SECTION_NUMBER));
+                    getArguments().getInt(ARG_SECTION_NUMBER)
+            );
+        }
+
+        public void onActivityResult(int requestCode, int resultCode, Intent imageReturnedIntent) {
+            final int REQ_CODE_PICK_IMAGE = 100;
+
+            super.onActivityResult(requestCode, resultCode, imageReturnedIntent);
+
+            Log.d("epigraphics", "Fragment sees result: " + requestCode);
+
+            switch(requestCode) {
+                case REQ_CODE_PICK_IMAGE:
+                    if(resultCode == RESULT_OK){
+                        Uri selectedImage = imageReturnedIntent.getData();
+                        String[] filePathColumn = {MediaStore.Images.Media.DATA};
+
+                        Cursor cursor = rootView.getContext().getContentResolver().query(
+                                selectedImage, filePathColumn, null, null, null
+                        );
+                        cursor.moveToFirst();
+
+                        int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
+                        String filePath = cursor.getString(columnIndex);
+                        cursor.close();
+
+                        Bitmap yourSelectedImage = BitmapFactory.decodeFile(filePath);
+                        Log.d("epigraphics", yourSelectedImage.getWidth() + ", " + yourSelectedImage.getHeight());
+
+                        ImageView rawImage = (ImageView)rootView.findViewById(R.id.img_raw);
+                        rawImage.setImageBitmap(yourSelectedImage);
+                    }
+            }
         }
     }
 
@@ -165,6 +222,13 @@ public class OverviewActivity extends ActionBarActivity
             }
         }
     };
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent imageReturnedIntent) {
+        // http://stackoverflow.com/a/6147919
+        Log.d("epigraphics", "Activity sees result.");
+        super.onActivityResult(requestCode, resultCode, imageReturnedIntent);
+    }
 
     @Override
     public void onResume() {
