@@ -55,14 +55,22 @@ public class OverviewActivity extends ActionBarActivity
     @Override
     public void onNavigationDrawerItemSelected(int position) {
         ArrayList<String> demoArray = new ArrayList<String>();
-        demoArray.add("test.txt");
-        demoArray.add("18.06/test.txt");
+        demoArray.add("/file1");
+        demoArray.add("/18.06/file2");
+        demoArray.add("/18.06/file3");
+        demoArray.add("/18.100c/file4");
+        demoArray.add("/18.100c/file5");
+        demoArray.add("/18.100c/day1/file8");
+        demoArray.add("/18.100c/day2/file9");
+        demoArray.add("/18.100c/day2/hour5/file10");
+        demoArray.add("/file6");
+
 
         // update the main content by replacing fragments
         FragmentManager fragmentManager = getSupportFragmentManager();
         if (position == 2) {
             fragmentManager.beginTransaction()
-                    .replace(R.id.container, FileSystem.newInstance(new Folder(null, demoArray)))
+                    .replace(R.id.container, FileSystem.newInstance(new Folder(null, "/", demoArray)))
                     .commit();
         } else {
             fragmentManager.beginTransaction()
@@ -75,7 +83,7 @@ public class OverviewActivity extends ActionBarActivity
     public void fileSystemInteraction(Items next) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         if (next.isFile()) {
-            //handle file
+            //TODO: handle file
             System.out.println(next.toString());
         } else {
             fragmentManager.beginTransaction()

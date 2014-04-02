@@ -2,7 +2,9 @@ package graphics.epi.filesystemtree;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Folder implements Items, Serializable {
     Folder parent;
@@ -10,22 +12,49 @@ public class Folder implements Items, Serializable {
 
     public List<Items> inside = new ArrayList<Items>();
 
-    public Folder(Folder parent, String s) {
+    public Folder(Folder parent, String name, List<String> allFiles) {
         this.parent = parent;
-        name = s;
-        inside.add(new Files("c.txt"));
-    }
+        this.name = name;
+        Map<String, List<String>> map = new HashMap<String, List<String>>();
 
-    public Folder(Folder parent, List<String> allFiles) {
-        this.parent = parent;
-        inside.add(new Files("a.txt"));
-        inside.add(new Files("b.txt"));
-        inside.add(new Folder(this, "b.txt"));
-        name = "/";
+        for (String s : allFiles) {
+            int secondSlash = -1;
+            for (int i = 1; i < s.length(); i++) {
+                if (s.charAt(i) == '/') {
+                    secondSlash = i;
+                    break;
+                }
+            }
+
+            if (secondSlash == -1) {
+                //s is just a file
+                inside.add(new Files(s.substring(1)));
+            } else {
+                String subfol = s.substring(1, secondSlash);
+                List<String> list = map.get(subfol);
+                if (list == null) {
+                    list = new ArrayList<String>();
+                }
+                list.add(s.substring(secondSlash));
+
+                map.put(subfol, list);
+            }
+        }
+
+        for (Map.Entry<String, List<String>> entry : map.entrySet()) {
+            String key = entry.getKey();
+            List<String> value = entry.getValue();
+            inside.add(new Folder(this, key, value));
+        }
     }
 
     public List<Items> getItems() {
-        return inside;
+        List<Items> ret = new ArrayList<Items>();
+        if (parent != null) {
+            ret.add(new Parent(parent));
+        }
+        ret.addAll(inside);
+        return ret;
     }
 
     @Override
@@ -34,6 +63,12 @@ public class Folder implements Items, Serializable {
     }
 
     public Items get(int position) {
+        if (parent != null) {
+            if (position == 0) {
+                return parent;
+            }
+            return inside.get(position - 1);
+        }
         return inside.get(position);
     }
 
