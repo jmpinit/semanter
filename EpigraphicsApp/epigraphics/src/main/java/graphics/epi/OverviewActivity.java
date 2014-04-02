@@ -30,6 +30,13 @@ import android.widget.TextView;
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
+import org.opencv.core.Mat;
+import org.opencv.imgproc.Imgproc;
+
+import static org.opencv.android.Utils.bitmapToMat;
+import static org.opencv.android.Utils.matToBitmap;
+import static org.opencv.imgproc.Imgproc.cvtColor;
+import static org.opencv.imgproc.Imgproc.threshold;
 
 public class OverviewActivity extends ActionBarActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
@@ -179,8 +186,6 @@ public class OverviewActivity extends ActionBarActivity
 
             super.onActivityResult(requestCode, resultCode, imageReturnedIntent);
 
-            Log.d("epigraphics", "Fragment sees result: " + requestCode);
-
             switch(requestCode) {
                 case REQ_CODE_PICK_IMAGE:
                     if(resultCode == RESULT_OK){
@@ -197,10 +202,30 @@ public class OverviewActivity extends ActionBarActivity
                         cursor.close();
 
                         Bitmap yourSelectedImage = BitmapFactory.decodeFile(filePath);
-                        Log.d("epigraphics", yourSelectedImage.getWidth() + ", " + yourSelectedImage.getHeight());
 
-                        ImageView rawImage = (ImageView)rootView.findViewById(R.id.img_raw);
-                        rawImage.setImageBitmap(yourSelectedImage);
+                        // display raw image
+                        ImageView rawView = (ImageView)rootView.findViewById(R.id.img_raw);
+                        rawView.setImageBitmap(yourSelectedImage);
+
+                        // image into OpenCV
+                        Mat imageMat = new Mat();
+                        bitmapToMat(yourSelectedImage, imageMat);
+
+                        // grayscale image
+                        Mat grayMat = new Mat();
+                        cvtColor(imageMat, grayMat, Imgproc.COLOR_RGB2GRAY);
+
+                        // threshold image
+                        Mat threshMat = new Mat();
+                        threshold(grayMat, threshMat, 128, 255, Imgproc.THRESH_BINARY);
+
+                        // image out of OpenCV
+                        Bitmap resultImage = Bitmap.createBitmap(yourSelectedImage);
+                        matToBitmap(threshMat, resultImage);
+
+                        // display result
+                        ImageView resultView = (ImageView)rootView.findViewById(R.id.img_result);
+                        resultView.setImageBitmap(resultImage);
                     }
             }
         }
