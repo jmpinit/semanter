@@ -6,23 +6,19 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Bundle;
 import android.provider.MediaStore;
-import android.support.v7.app.ActionBarActivity;
-import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.content.Context;
-import android.os.Build;
-import android.os.Bundle;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.support.v4.widget.DrawerLayout;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -30,24 +26,18 @@ import android.widget.TextView;
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
-import org.opencv.core.Mat;
-import org.opencv.imgproc.Imgproc;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
-import java.util.concurrent.Future;
 import java.util.concurrent.RunnableFuture;
 
-import graphics.epi.vision.OpThreshold;
+import graphics.epi.vision.OpDummyLong;
 import graphics.epi.vision.VisionExecutor;
-
-import static org.opencv.android.Utils.bitmapToMat;
-import static org.opencv.android.Utils.matToBitmap;
-import static org.opencv.imgproc.Imgproc.cvtColor;
-import static org.opencv.imgproc.Imgproc.threshold;
+import graphics.epi.vision.VisionListener;
+import graphics.epi.vision.VisionOp;
 
 public class OverviewActivity extends ActionBarActivity
-        implements NavigationDrawerFragment.NavigationDrawerCallbacks {
+        implements NavigationDrawerFragment.NavigationDrawerCallbacks, VisionListener {
 
     static final String TAG = "epigraphics";
 
@@ -105,7 +95,6 @@ public class OverviewActivity extends ActionBarActivity
         actionBar.setDisplayShowTitleEnabled(true);
         actionBar.setTitle(mTitle);
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -220,22 +209,9 @@ public class OverviewActivity extends ActionBarActivity
                         // launch async vision task
                         Log.d(TAG, "launching vision task");
                         Executor executor = new VisionExecutor();
-                        RunnableFuture task = new OpThreshold(yourSelectedImage);
+                        RunnableFuture task = new OpDummyLong((VisionListener)this.getActivity(), yourSelectedImage);
                         executor.execute(task);
                         Log.d(TAG, "launched vision task");
-
-                        try {
-                            Bitmap resultImage = (Bitmap) task.get();
-                            Log.d(TAG, "got result");
-
-                            // display result
-                            ImageView resultView = (ImageView) rootView.findViewById(R.id.img_result);
-                            resultView.setImageBitmap(resultImage);
-                        } catch(InterruptedException e) {
-                            Log.e(TAG, Log.getStackTraceString(e));
-                        } catch(ExecutionException e) {
-                            Log.e(TAG, Log.getStackTraceString(e));
-                        }
                     }
             }
         }
@@ -269,5 +245,29 @@ public class OverviewActivity extends ActionBarActivity
     public void onResume() {
         super.onResume();
         OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_2_4_6, this, mLoaderCallback);
+    }
+
+    @Override
+    public void OnVisionOpComplete(VisionOp op) {
+        Log.d(TAG, "op completed");
+
+        // TODO result dispatcher
+        try {
+            final Bitmap resultImage = (Bitmap) op.get();
+            Log.d(TAG, "got result");
+
+            // display result
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    ImageView resultView = (ImageView) findViewById(R.id.img_raw); // FIXME should be img_result
+                    resultView.setImageBitmap(resultImage);
+                }
+            });
+        } catch(InterruptedException e) {
+            Log.e(TAG, Log.getStackTraceString(e));
+        } catch(ExecutionException e) {
+            Log.e(TAG, Log.getStackTraceString(e));
+        }
     }
 }
