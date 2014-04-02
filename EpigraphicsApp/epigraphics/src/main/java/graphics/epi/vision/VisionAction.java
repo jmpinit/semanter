@@ -7,21 +7,20 @@ import java.util.concurrent.RunnableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-abstract public class VisionOp implements RunnableFuture {
-    protected Bitmap source, result;
-    protected boolean finished, cancelled;
+public abstract class VisionAction implements RunnableFuture {
+    protected Bitmap source;
     protected VisionListener caller;
+    protected Object result;
 
-    public VisionOp(VisionListener caller, Bitmap source) {
-        this.caller = caller;
+    protected boolean finished, cancelled;
+
+    public VisionAction(VisionListener caller, Bitmap source) {
         this.source = source;
-        finished = false;
-        cancelled = false;
     }
 
     protected void finish() {
         finished = true;
-        ((VisionListener)caller).OnVisionOpComplete(this);
+        ((VisionListener)caller).OnVisionActionComplete(this);
     }
 
     @Override

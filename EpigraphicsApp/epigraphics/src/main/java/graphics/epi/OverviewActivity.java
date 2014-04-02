@@ -31,10 +31,11 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.RunnableFuture;
 
-import graphics.epi.vision.OpDummyLong;
+import graphics.epi.vision.VisionAction;
+import graphics.epi.vision.operations.OpDummyLong;
 import graphics.epi.vision.VisionExecutor;
 import graphics.epi.vision.VisionListener;
-import graphics.epi.vision.VisionOp;
+import graphics.epi.vision.operations.VisionOp;
 
 public class OverviewActivity extends ActionBarActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks, VisionListener {
@@ -248,7 +249,7 @@ public class OverviewActivity extends ActionBarActivity
     }
 
     @Override
-    public void OnVisionOpComplete(VisionOp op) {
+    public void OnVisionActionComplete(VisionAction op) {
         Log.d(TAG, "op completed");
 
         // TODO result dispatcher

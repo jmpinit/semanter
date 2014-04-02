@@ -1,15 +1,11 @@
-package graphics.epi.vision;
+package graphics.epi.vision.operations;
 
 import android.graphics.Bitmap;
-import android.util.Log;
 
 import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
 
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.RunnableFuture;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import graphics.epi.vision.VisionListener;
 
 import static org.opencv.android.Utils.bitmapToMat;
 import static org.opencv.android.Utils.matToBitmap;
