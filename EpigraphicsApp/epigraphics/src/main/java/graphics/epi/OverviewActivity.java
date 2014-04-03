@@ -27,10 +27,14 @@ import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.RunnableFuture;
 
+import graphics.epi.filesystemtree.Folder;
+import graphics.epi.filesystemtree.Items;
 import graphics.epi.vision.VisionAction;
 import graphics.epi.vision.operations.OpDummyLong;
 import graphics.epi.vision.VisionExecutor;
@@ -38,7 +42,7 @@ import graphics.epi.vision.VisionListener;
 import graphics.epi.vision.operations.VisionOp;
 
 public class OverviewActivity extends ActionBarActivity
-        implements NavigationDrawerFragment.NavigationDrawerCallbacks, VisionListener {
+        implements NavigationDrawerFragment.NavigationDrawerCallbacks, FileSystemFragment.FileSystemCallbacks, VisionListener {
 
     static final String TAG = "epigraphics";
 
@@ -69,11 +73,38 @@ public class OverviewActivity extends ActionBarActivity
 
     @Override
     public void onNavigationDrawerItemSelected(int position) {
+        ArrayList<String> demoArray = new ArrayList<String>();
+
+        demoArray.add("/file1");
+        demoArray.add("/18.06/file2");
+        demoArray.add("/18.06/file3");
+        demoArray.add("/18.100c/file4");
+        demoArray.add("/18.100c/file5");
+        demoArray.add("/18.100c/day1/file8");
+        demoArray.add("/18.100c/day2/file9");
+        demoArray.add("/18.100c/day2/hour5/file10");
+        demoArray.add("/file6");
+
         // update the main content by replacing fragments
         FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction()
+        /*fragmentManager.beginTransaction()
                 .replace(R.id.container, PlaceholderFragment.newInstance(position + 1))
-                .commit();
+                .commit();*/
+        fragmentManager.beginTransaction()
+                .replace(R.id.container, FileSystemFragment.newInstance(new Folder(null, "/", demoArray))).commit();
+    }
+
+    @Override
+    public void fileSystemInteraction(Items next) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        if (next.isFile()) {
+            //TODO: handle file
+            System.out.println(next.toString());
+        } else {
+            fragmentManager.beginTransaction()
+                    .replace(R.id.container, FileSystemFragment.newInstance((Folder) next))
+                    .commit();
+        }
     }
 
     public void onSectionAttached(int number) {
