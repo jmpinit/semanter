@@ -29,13 +29,16 @@ import org.opencv.android.OpenCVLoader;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.RunnableFuture;
 
 import graphics.epi.filesystemtree.Folder;
 import graphics.epi.filesystemtree.Items;
+import graphics.epi.utils.Geometry;
 import graphics.epi.vision.VisionAction;
+import graphics.epi.vision.analyze.SquareFinder;
 import graphics.epi.vision.operations.OpDummyLong;
 import graphics.epi.vision.VisionExecutor;
 import graphics.epi.vision.VisionListener;
@@ -73,7 +76,7 @@ public class OverviewActivity extends ActionBarActivity
 
     @Override
     public void onNavigationDrawerItemSelected(int position) {
-        ArrayList<String> demoArray = new ArrayList<String>();
+        /*ArrayList<String> demoArray = new ArrayList<String>();
 
         demoArray.add("/file1");
         demoArray.add("/18.06/file2");
@@ -83,15 +86,15 @@ public class OverviewActivity extends ActionBarActivity
         demoArray.add("/18.100c/day1/file8");
         demoArray.add("/18.100c/day2/file9");
         demoArray.add("/18.100c/day2/hour5/file10");
-        demoArray.add("/file6");
+        demoArray.add("/file6");*/
 
         // update the main content by replacing fragments
         FragmentManager fragmentManager = getSupportFragmentManager();
-        /*fragmentManager.beginTransaction()
-                .replace(R.id.container, PlaceholderFragment.newInstance(position + 1))
-                .commit();*/
         fragmentManager.beginTransaction()
-                .replace(R.id.container, FileSystemFragment.newInstance(new Folder(null, "/", demoArray))).commit();
+                .replace(R.id.container, PlaceholderFragment.newInstance(position + 1))
+                .commit();
+        /*fragmentManager.beginTransaction()
+                .replace(R.id.container, FileSystemFragment.newInstance(new Folder(null, "/", demoArray))).commit();*/
     }
 
     @Override
@@ -241,7 +244,7 @@ public class OverviewActivity extends ActionBarActivity
                         // launch async vision task
                         Log.d(TAG, "launching vision task");
                         Executor executor = new VisionExecutor();
-                        RunnableFuture task = new OpDummyLong((VisionListener)this.getActivity(), yourSelectedImage);
+                        RunnableFuture task = new SquareFinder((VisionListener)this.getActivity(), yourSelectedImage);
                         executor.execute(task);
                         Log.d(TAG, "launched vision task");
                     }
@@ -285,17 +288,20 @@ public class OverviewActivity extends ActionBarActivity
 
         // TODO result dispatcher
         try {
-            final Bitmap resultImage = (Bitmap) op.get();
+            final List<Geometry.Quad> squares = (List<Geometry.Quad>) op.get();
             Log.d(TAG, "got result");
+            for(Geometry.Quad quad: squares) {
+                Log.d(TAG, quad.toString());
+            }
 
             // display result
-            runOnUiThread(new Runnable() {
+            /*runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     ImageView resultView = (ImageView) findViewById(R.id.img_raw); // FIXME should be img_result
                     resultView.setImageBitmap(resultImage);
                 }
-            });
+            });*/
         } catch(InterruptedException e) {
             Log.e(TAG, Log.getStackTraceString(e));
         } catch(ExecutionException e) {
