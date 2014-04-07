@@ -1,32 +1,40 @@
 package graphics.epi.db.model;
 
-/**
- * Created by coreywalsh on 4/6/14.
- */
 public class Note {
     int id;
     String path;
-    String class;
+    String classname;
     String subject;
     String plaintext;
     String keywords;
     String name;
     String created_at;
     String written_at;
-
     // constructors
     public Note() {
     }
 
-    public Note(String note, int status) {
-        this.note = note;
-        this.status = status;
+    public Note(String path, String classname, String subject, String plaintext, String keywords, String name, String created_at, String written_at) {
+        this.path = path;
+        this.classname = classname;
+        this.subject = subject;
+        this.plaintext = plaintext;
+        this.keywords = keywords;
+        this.name = name;
+        this.created_at = created_at;
+        this.written_at = written_at;
     }
 
-    public Note(int id, String note, int status) {
+    public Note(int id, String path, String classname, String subject, String plaintext, String keywords, String name, String created_at, String written_at) {
         this.id = id;
-        this.note = note;
-        this.status = status;
+        this.path = path;
+        this.classname = classname;
+        this.subject = subject;
+        this.plaintext = plaintext;
+        this.keywords = keywords;
+        this.name = name;
+        this.created_at = created_at;
+        this.written_at = written_at;
     }
 
     // setters
@@ -36,8 +44,8 @@ public class Note {
     public void setPath(String path) {
         this.path = path;
     }
-    public void setClass(String class) {
-        this.class = class;
+    public void setClassName(String classname) {
+        this.classname = classname;
     }
     public void setSubject(String subject) {
         this.subject = subject;
@@ -65,8 +73,8 @@ public class Note {
     public String getPath() {
         return this.path;
     }
-    public String getClass() {
-        return this.class;
+    public String getClassName() {
+        return this.classname;
     }
     public String getSubject() {
         return this.subject;

@@ -1,8 +1,8 @@
 package graphics.epi.db.helper;
 
 import graphics.epi.db.model.Note;
-import graphics.epi.db.model.Note;
-import graphics.epi.db.model.Note;
+import graphics.epi.db.model.Fragment;
+import graphics.epi.db.model.Bound;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -41,7 +41,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String KEY_PATH = "path";
 
     // NOTES Table - column names
-    private static final String KEY_CLASS = "class";
+    private static final String KEY_CLASSNAME = "classname";
     private static final String KEY_SUBJECT = "subject";
     private static final String KEY_PLAINTEXT = "plaintext";
     private static final String KEY_KEYWORDS = "keywords";
@@ -68,7 +68,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + TABLE_NOTE + "("
             + KEY_ID + " INTEGER PRIMARY KEY,"
             + KEY_PATH + " TEXT,"
-            + KEY_CLASS + " TEXT,"
+            + KEY_CLASSNAME + " TEXT,"
             + KEY_SUBJECT + " TEXT,"
             + KEY_PLAINTEXT + " TEXT,"
             + KEY_KEYWORDS + " TEXT,"
@@ -93,14 +93,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + KEY_CREATED_AT + " DATETIME"
             + ")";
     // note_fragments table create statement
-    private static final String CREATE_TABLE_NOTE_FRAGMENTS = "CREATE TABLE "
+    private static final String CREATE_TABLE_NOTE_FRAGMENT = "CREATE TABLE "
             + TABLE_NOTE_FRAGMENT + "("
             + KEY_ID + " INTEGER PRIMARY KEY,"
             + KEY_NOTE_ID + " INTEGER,"
             + KEY_FRAGMENT_ID + " INTEGER,"
             + KEY_CREATED_AT + " DATETIME" + ")";
     // fragment_bounds table create statement
-    private static final String CREATE_TABLE_FRAGMENT_BOUNDS = "CREATE TABLE "
+    private static final String CREATE_TABLE_FRAGMENT_BOUND = "CREATE TABLE "
             + TABLE_FRAGMENT_BOUND + "("
             + KEY_ID + " INTEGER PRIMARY KEY,"
             + KEY_FRAGMENT_ID + " INTEGER,"
@@ -118,8 +118,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL(CREATE_TABLE_NOTE);
         db.execSQL(CREATE_TABLE_FRAGMENT);
         db.execSQL(CREATE_TABLE_BOUND);
-        db.execSQL(CREATE_TABLE_NOTE_FRAGMENTS);
-        db.execSQL(CREATE_TABLE_FRAGMENT_BOUNDS);
+        db.execSQL(CREATE_TABLE_NOTE_FRAGMENT);
+        db.execSQL(CREATE_TABLE_FRAGMENT_BOUND);
     }
 
     @Override
@@ -129,7 +129,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_FRAGMENT);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_BOUND);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_NOTE_FRAGMENT);
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_FRAGMENT_BOUNDS);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_FRAGMENT_BOUND);
 
         // create new tables
         onCreate(db);
@@ -145,7 +145,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         ContentValues values = new ContentValues();
         values.put(KEY_PATH, note.getPath());
-        values.put(KEY_CLASS, note.getClass());
+        values.put(KEY_CLASSNAME, note.getClassName());
         values.put(KEY_SUBJECT, note.getSubject());
         values.put(KEY_PLAINTEXT, note.getPlainText());
         values.put(KEY_KEYWORDS, note.getKeywords());
@@ -184,7 +184,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         td.setId(c.getInt( c.getColumnIndex(KEY_ID) ));
         td.setPath(c.getString( c.getColumnIndex(KEY_PATH) ));
-        td.setClass(c.getString( c.getColumnIndex(KEY_CLASS) ));
+        td.setClassName(c.getString( c.getColumnIndex(KEY_CLASSNAME) ));
         td.setSubject(c.getString( c.getColumnIndex(KEY_SUBJECT) ));
         td.setPlainText(c.getString( c.getColumnIndex(KEY_PLAINTEXT) ));
         td.setName(c.getString( c.getColumnIndex(KEY_NAME) ));
@@ -213,7 +213,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 Note td = new Note();
                 td.setId(c.getInt( c.getColumnIndex(KEY_ID) ));
                 td.setPath(c.getString( c.getColumnIndex(KEY_PATH) ));
-                td.setClass(c.getString( c.getColumnIndex(KEY_CLASS) ));
+                td.setClassName(c.getString( c.getColumnIndex(KEY_CLASSNAME) ));
                 td.setSubject(c.getString( c.getColumnIndex(KEY_SUBJECT) ));
                 td.setPlainText(c.getString( c.getColumnIndex(KEY_PLAINTEXT) ));
                 td.setName(c.getString( c.getColumnIndex(KEY_NAME) ));
@@ -285,7 +285,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         ContentValues values = new ContentValues();
         values.put(KEY_PATH, note.getPath());
-        values.put(KEY_CLASS, note.getClass());
+        values.put(KEY_CLASSNAME, note.getClassName());
         values.put(KEY_SUBJECT, note.getSubject());
         values.put(KEY_PLAINTEXT, note.getPlainText());
         values.put(KEY_KEYWORDS, note.getKeywords());
@@ -357,12 +357,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      * */
     public List<Fragment> getAllFragmentsForNote(Note note) {
         List<Fragment> fragments = new ArrayList<Fragment>();
-
-        String selectQuery = "SELECT  * FROM " + TABLE_TODO + " td, "
-                + TABLE_TAG + " tg, " + TABLE_TODO_TAG + " tt WHERE tg."
-                + KEY_TAG_NAME + " = '" + tag_name + "'" + " AND tg." + KEY_ID
-                + " = " + "tt." + KEY_TAG_ID + " AND td." + KEY_ID + " = "
-                + "tt." + KEY_TODO_ID; //this query most def won't work, but it should be similar
+        String selectQuery = "SELECT  * FROM " + TABLE_FRAGMENT;
+        // String selectQuery = "SELECT  * FROM " + TABLE_TODO + " td, "
+        // 		+ TABLE_TAG + " tg, " + TABLE_TODO_TAG + " tt WHERE tg."
+        // 		+ KEY_TAG_NAME + " = '" + tag_name + "'" + " AND tg." + KEY_ID
+        // 		+ " = " + "tt." + KEY_TAG_ID + " AND td." + KEY_ID + " = "
+        // 		+ "tt." + KEY_TODO_ID; //this query most def won't work, but it should be similar
 
         Log.e(LOG, selectQuery);
 
@@ -463,12 +463,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      * */
     public List<Bound> getAllBoundsForFragment(Fragment fragment) {
         List<Bound> bounds = new ArrayList<Bound>();
-
-        String selectQuery = "SELECT  * FROM " + TABLE_TODO + " td, "
-                + TABLE_TAG + " tg, " + TABLE_TODO_TAG + " tt WHERE tg."
-                + KEY_TAG_NAME + " = '" + tag_name + "'" + " AND tg." + KEY_ID
-                + " = " + "tt." + KEY_TAG_ID + " AND td." + KEY_ID + " = "
-                + "tt." + KEY_TODO_ID; //this query most def won't work, but it should be similar
+        String selectQuery = "SELECT  * FROM " + TABLE_BOUND;
+        // String selectQuery = "SELECT  * FROM " + TABLE_TODO + " td, "
+        // 		+ TABLE_TAG + " tg, " + TABLE_TODO_TAG + " tt WHERE tg."
+        // 		+ KEY_TAG_NAME + " = '" + tag_name + "'" + " AND tg." + KEY_ID
+        // 		+ " = " + "tt." + KEY_TAG_ID + " AND td." + KEY_ID + " = "
+        // 		+ "tt." + KEY_TODO_ID; //this query most def won't work, but it should be similar
 
         Log.e(LOG, selectQuery);
 
