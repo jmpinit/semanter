@@ -59,7 +59,7 @@ public class Folder implements Items, Serializable {
 
     @Override
     public String toString() {
-        return "Folder " + name;
+        return name;
     }
 
     public Items get(int position) {
@@ -76,4 +76,3 @@ public class Folder implements Items, Serializable {
         return false;
     }
 }
-
