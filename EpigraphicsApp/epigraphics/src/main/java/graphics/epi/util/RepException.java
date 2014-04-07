@@ -1,4 +1,4 @@
-package graphics.epi.utils;
+package graphics.epi.util;
 
 /**
  * Thrown when the representation invariant of an object is violated

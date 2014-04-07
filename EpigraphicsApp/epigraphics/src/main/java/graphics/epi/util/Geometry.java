@@ -1,4 +1,4 @@
-package graphics.epi.utils;
+package graphics.epi.util;
 
 import android.os.Parcel;
 import android.os.Parcelable;
