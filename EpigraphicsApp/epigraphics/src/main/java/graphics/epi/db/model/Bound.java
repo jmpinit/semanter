@@ -1,20 +1,23 @@
 package graphics.epi.db.model;
 
-/**
- * Created by coreywalsh on 4/6/14.
- */
-public class Bounds {
-    public Bounds() {
+public class Bound {
+    int id;
+    int left;
+    int right;
+    int top;
+    int bottom;
+    String created_at;
+    public Bound() {
     }
 
-    public Bounds(int left, int right, int top, int bottom) {
+    public Bound(int left, int right, int top, int bottom) {
         this.left = left;
         this.right = right;
         this.top = top;
         this.bottom = bottom;
     }
 
-    public Bounds(int id, int left, int right, int top, int bottom) {
+    public Bound(int id, int left, int right, int top, int bottom) {
         this.id = id;
         this.left = left;
         this.right = right;
@@ -38,6 +41,9 @@ public class Bounds {
     public void setBottom(int bottom) {
         this.bottom = bottom;
     }
+    public void setCreatedAt(String created_at){
+        this.created_at = created_at;
+    }
 
     // getters
     public long getId() {
@@ -55,4 +61,8 @@ public class Bounds {
     public int getBottom() {
         return this.bottom;
     }
+    public String getCreatedAt() {
+        return this.created_at;
+    }
+
 }
