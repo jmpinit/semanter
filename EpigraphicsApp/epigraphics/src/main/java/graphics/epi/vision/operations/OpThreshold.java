@@ -13,9 +13,6 @@ import static org.opencv.imgproc.Imgproc.cvtColor;
 import static org.opencv.imgproc.Imgproc.threshold;
 
 public class OpThreshold extends VisionOp {
-    private Bitmap source, result;
-    private boolean finished, cancelled;
-
     public OpThreshold(VisionListener caller, Bitmap source) {
         super(caller, source);
     }

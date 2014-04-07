@@ -1,6 +1,7 @@
 package graphics.epi.vision;
 
 import android.graphics.Bitmap;
+import android.util.Log;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.RunnableFuture;
@@ -15,6 +16,7 @@ public abstract class VisionAction implements RunnableFuture {
     protected boolean finished, cancelled;
 
     public VisionAction(VisionListener caller, Bitmap source) {
+        this.caller = caller;
         this.source = source;
     }
 
@@ -39,26 +41,5 @@ public abstract class VisionAction implements RunnableFuture {
     @Override
     public boolean isDone() {
         return finished;
-    }
-
-    @Override
-    public Object get() throws InterruptedException, ExecutionException {
-        while(result == null) { }
-        return result;
-    }
-
-    @Override
-    public Object get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-        long milliTimeout = unit.toMillis(timeout);
-        long startTime = System.currentTimeMillis();
-
-        // if not done, wait for a bit
-        while(result != null) {
-            if(System.currentTimeMillis() - startTime > milliTimeout) {
-                throw new TimeoutException();
-            }
-        }
-
-        return result;
     }
 }

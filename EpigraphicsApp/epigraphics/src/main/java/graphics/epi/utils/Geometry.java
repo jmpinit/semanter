@@ -1,12 +1,15 @@
 package graphics.epi.utils;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import org.opencv.core.Point;
 
 public class Geometry {
     /**
      * Immutable square shape
      */
-    public static class Quad {
+    public static class Quad implements Parcelable {
         private final Point[] points;
 
         public Quad(Point first, Point second, Point third, Point fourth) throws RepException {
@@ -60,6 +63,39 @@ public class Geometry {
                         }
                     }
                 }
+            }
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel out, int flags) {
+            for(int i = 0; i < 4; i++) {
+                out.writeDouble(points[i].x);
+                out.writeDouble(points[i].y);
+            }
+        }
+
+        public static final Parcelable.Creator<Quad> CREATOR
+                = new Parcelable.Creator<Quad>() {
+
+            public Quad createFromParcel(Parcel in) {
+                return new Quad(in);
+            }
+
+            public Quad[] newArray(int size) {
+                return new Quad[size];
+            }
+        };
+
+        private Quad(Parcel in) {
+            points = new Point[4];
+
+            for(int i = 0; i < 4; i++) {
+                points[i] = new Point(in.readDouble(), in.readDouble());
             }
         }
     }

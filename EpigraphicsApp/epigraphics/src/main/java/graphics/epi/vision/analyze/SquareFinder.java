@@ -1,6 +1,8 @@
 package graphics.epi.vision.analyze;
 
 import android.graphics.Bitmap;
+import android.os.Bundle;
+import android.util.Log;
 
 import org.opencv.android.Utils;
 import org.opencv.core.Core;
@@ -11,22 +13,34 @@ import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
-import org.opencv.imgproc.Imgproc;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import graphics.epi.utils.Geometry;
-import graphics.epi.utils.RepException;
 import graphics.epi.vision.VisionListener;
 
-import static org.opencv.imgproc.Imgproc.*;
+import static org.opencv.imgproc.Imgproc.CHAIN_APPROX_SIMPLE;
+import static org.opencv.imgproc.Imgproc.COLOR_BGR2GRAY;
+import static org.opencv.imgproc.Imgproc.COLOR_RGB2GRAY;
+import static org.opencv.imgproc.Imgproc.Canny;
+import static org.opencv.imgproc.Imgproc.RETR_LIST;
+import static org.opencv.imgproc.Imgproc.THRESH_BINARY_INV;
+import static org.opencv.imgproc.Imgproc.approxPolyDP;
+import static org.opencv.imgproc.Imgproc.arcLength;
+import static org.opencv.imgproc.Imgproc.contourArea;
+import static org.opencv.imgproc.Imgproc.cvtColor;
+import static org.opencv.imgproc.Imgproc.dilate;
+import static org.opencv.imgproc.Imgproc.findContours;
+import static org.opencv.imgproc.Imgproc.isContourConvex;
+import static org.opencv.imgproc.Imgproc.medianBlur;
+import static org.opencv.imgproc.Imgproc.threshold;
 
 public class SquareFinder extends VisionAnalysis {
-    private static final int SQUARE_SIZE = 1000;
+    private static final String TAG = "SquareFinder"; // FIXME assign via class name
 
-    private List<Geometry.Quad> squares;
+    private static final int SQUARE_SIZE = 1000;
 
     public SquareFinder(VisionListener caller, Bitmap source) {
         super(caller, source);
@@ -42,6 +56,8 @@ public class SquareFinder extends VisionAnalysis {
     }
 
     public void run() {
+        ArrayList<Geometry.Quad> squares;
+
         Mat image = new Mat();
         Utils.bitmapToMat(source, image);
 
@@ -55,22 +71,24 @@ public class SquareFinder extends VisionAnalysis {
         int height = blurred.height();
         int depth = blurred.depth();
 
-        Mat gray0 = blurred.clone();
+        Mat gray0 = new Mat(width, height, depth);
+        blurred.copyTo(gray0);
 
         squares = new ArrayList<Geometry.Quad>();
 
         // find squares in every color plane of the image
         for (int c = 0; c < 3; c++) {
-            Core.mixChannels(Arrays.asList(new Mat[]{blurred}), Arrays.asList(new Mat[]{gray0}), new MatOfInt(c, 0));
+            Core.mixChannels(Arrays.asList(blurred), Arrays.asList(new Mat[]{gray0}), new MatOfInt(c, 0));
 
             // try several threshold levels
             int thresholdLevel = 8;
             for(int l = 0; l < thresholdLevel; l++) {
                 // use canny instead of 0 threshold level
                 // canny helps catch squares with gradient shading
-                Mat gray = new Mat(gray0.rows(), gray0.cols(), gray0.type());
+                Mat gray = new Mat();
+
                 if(l == 0) {
-                    Canny(gray0, gray, 10.0, 20.0, 1, false);
+                    Canny(gray0, gray, 10.0, 20.0, 3, false);
                     Mat kernel = new Mat(11, 11, CvType.CV_8UC1, new Scalar(1));
                     dilate(gray, gray, kernel);
                 } else {
@@ -84,31 +102,35 @@ public class SquareFinder extends VisionAnalysis {
                 findContours(gray, contours, new Mat(), RETR_LIST, CHAIN_APPROX_SIMPLE);
 
                 // test contours
-                for(int i = 0; i < contours.size(); i++) {
+                for (MatOfPoint contour : contours) {
                     // approximate contour with accuracy proportional to the contour perimeter
-                    MatOfPoint2f thisContour = new MatOfPoint2f(contours.get(i));
+                    MatOfPoint2f thisContour = new MatOfPoint2f(contour.toArray());
                     double arclength = 0.02 * arcLength(thisContour, true);
                     MatOfPoint2f approx = new MatOfPoint2f();
-                    approxPolyDP(approx, thisContour, arclength, true);
+                    approxPolyDP(thisContour, approx, arclength, true);
 
                     double area = contourArea(approx);
-                    boolean isConvex = isContourConvex(new MatOfPoint(approx));
-                    if(approx.cols() == 4 && Math.abs(area) > SQUARE_SIZE && isConvex) {
+                    boolean isConvex = isContourConvex(new MatOfPoint(approx.toArray()));
+                    if (approx.cols() == 4 && Math.abs(area) > SQUARE_SIZE && isConvex) {
                         double maxCosine = 0;
 
                         Point[] approxArray = approx.toArray();
-                        for(int j = 2; j < 5; j++) {
-                            double cosine = Math.abs(angle(approxArray[j%4], approxArray[j-2], approxArray[j-1]));
+                        for (int j = 2; j < 5; j++) {
+                            double cosine = Math.abs(angle(approxArray[j % 4], approxArray[j - 2], approxArray[j - 1]));
                             maxCosine = Math.max(maxCosine, cosine);
                         }
 
-                        if(maxCosine > Math.PI) {
+                        if (maxCosine > Math.PI) {
                             squares.add(new Geometry.Quad(approxArray));
                         }
                     }
                 }
             }
         }
+
+        result = new Bundle();
+        result.putParcelableArrayList("squares", squares);
+        Log.d(TAG, "result created");
 
         finish();
     }

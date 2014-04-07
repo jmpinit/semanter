@@ -42,6 +42,7 @@ import graphics.epi.vision.analyze.SquareFinder;
 import graphics.epi.vision.operations.OpDummyLong;
 import graphics.epi.vision.VisionExecutor;
 import graphics.epi.vision.VisionListener;
+import graphics.epi.vision.operations.OpThreshold;
 import graphics.epi.vision.operations.VisionOp;
 
 public class OverviewActivity extends ActionBarActivity
@@ -284,12 +285,12 @@ public class OverviewActivity extends ActionBarActivity
 
     @Override
     public void OnVisionActionComplete(VisionAction op) {
-        Log.d(TAG, "op completed");
-
         // TODO result dispatcher
         try {
-            final List<Geometry.Quad> squares = (List<Geometry.Quad>) op.get();
-            Log.d(TAG, "got result");
+            final Bundle results = (Bundle) op.get();
+
+            List<Geometry.Quad> squares = results.getParcelableArrayList("squares");
+            Log.d(TAG, "found " + squares.size() + " squares.");
             for(Geometry.Quad quad: squares) {
                 Log.d(TAG, quad.toString());
             }
