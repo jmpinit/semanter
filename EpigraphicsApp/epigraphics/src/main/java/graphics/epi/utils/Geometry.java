@@ -55,7 +55,8 @@ public class Geometry {
                 segs[i] = new LineSegment(points[i], points[i+1]);
             }
 
-            for(int i = 0; i < segs.length; i++) {
+            // FIXME check for intersection except at ends of edges
+            /*for(int i = 0; i < segs.length; i++) {
                 for(int j = 0; j < segs.length; j++) {
                     if(i != j) {
                         if(segs[i].collides(segs[j])) {
@@ -63,7 +64,7 @@ public class Geometry {
                         }
                     }
                 }
-            }
+            }*/
         }
 
         @Override
