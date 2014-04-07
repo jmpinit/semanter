@@ -1,7 +1,5 @@
 package graphics.epi.filesystemtree;
 
-import android.provider.MediaStore;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,7 +28,7 @@ public class Folder implements Items, Serializable {
 
             if (secondSlash == -1) {
                 //s is just a file
-                // FIXME inside.add(new MediaStore.Files(s.substring(1)));
+                inside.add(new Files(s.substring(1)));
             } else {
                 String subfol = s.substring(1, secondSlash);
                 List<String> list = map.get(subfol);
@@ -61,7 +59,7 @@ public class Folder implements Items, Serializable {
 
     @Override
     public String toString() {
-        return "Folder " + name;
+        return name;
     }
 
     public Items get(int position) {

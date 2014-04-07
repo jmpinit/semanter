@@ -27,6 +27,8 @@ import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.RunnableFuture;
@@ -34,9 +36,10 @@ import java.util.concurrent.RunnableFuture;
 import graphics.epi.filesystemtree.Folder;
 import graphics.epi.filesystemtree.Items;
 import graphics.epi.vision.VisionAction;
+import graphics.epi.vision.operations.OpDummyLong;
 import graphics.epi.vision.VisionExecutor;
 import graphics.epi.vision.VisionListener;
-import graphics.epi.vision.operations.OpDeskew;
+import graphics.epi.vision.operations.VisionOp;
 
 public class OverviewActivity extends ActionBarActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks, FileSystemFragment.FileSystemCallbacks, VisionListener {
@@ -70,7 +73,7 @@ public class OverviewActivity extends ActionBarActivity
 
     @Override
     public void onNavigationDrawerItemSelected(int position) {
-        /*ArrayList<String> demoArray = new ArrayList<String>();
+        ArrayList<String> demoArray = new ArrayList<String>();
 
         demoArray.add("/file1");
         demoArray.add("/18.06/file2");
@@ -80,15 +83,15 @@ public class OverviewActivity extends ActionBarActivity
         demoArray.add("/18.100c/day1/file8");
         demoArray.add("/18.100c/day2/file9");
         demoArray.add("/18.100c/day2/hour5/file10");
-        demoArray.add("/file6");*/
+        demoArray.add("/file6");
 
         // update the main content by replacing fragments
         FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction()
-                .replace(R.id.container, PlaceholderFragment.newInstance(position + 1))
-                .commit();
         /*fragmentManager.beginTransaction()
-                .replace(R.id.container, FileSystemFragment.newInstance(new Folder(null, "/", demoArray))).commit();*/
+                .replace(R.id.container, PlaceholderFragment.newInstance(position + 1))
+                .commit();*/
+        fragmentManager.beginTransaction()
+                .replace(R.id.container, FileSystemFragment.newInstance(new Folder(null, "/", demoArray))).commit();
     }
 
     @Override
@@ -238,7 +241,7 @@ public class OverviewActivity extends ActionBarActivity
                         // launch async vision task
                         Log.d(TAG, "launching vision task");
                         Executor executor = new VisionExecutor();
-                        RunnableFuture task = new OpDeskew((VisionListener)this.getActivity(), yourSelectedImage);
+                        RunnableFuture task = new OpDummyLong((VisionListener)this.getActivity(), yourSelectedImage);
                         executor.execute(task);
                         Log.d(TAG, "launched vision task");
                     }
@@ -253,6 +256,7 @@ public class OverviewActivity extends ActionBarActivity
                 case LoaderCallbackInterface.SUCCESS:
                 {
                     Log.i(TAG, "OpenCV loaded successfully");
+                    //mOpenCvCameraView.enableView();
                 } break;
                 default:
                 {
@@ -277,39 +281,21 @@ public class OverviewActivity extends ActionBarActivity
 
     @Override
     public void OnVisionActionComplete(VisionAction op) {
+        Log.d(TAG, "op completed");
+
         // TODO result dispatcher
         try {
-            final Bitmap deskewed = (Bitmap)op.get();
+            final Bitmap resultImage = (Bitmap) op.get();
+            Log.d(TAG, "got result");
 
             // display result
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     ImageView resultView = (ImageView) findViewById(R.id.img_raw); // FIXME should be img_result
-                    resultView.setImageBitmap(deskewed);
+                    resultView.setImageBitmap(resultImage);
                 }
             });
-
-            /*final Bundle results = (Bundle) op.get();
-
-            final List<Geometry.Quad> squares = results.getParcelableArrayList("squares");
-            Log.d(TAG, "found " + squares.size() + " squares.");
-            for(Geometry.Quad quad: squares) {
-                Log.d(TAG, quad.toString());
-            }
-
-            // display result
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    ImageView resultView = (ImageView) findViewById(R.id.img_raw); // FIXME should be img_result
-                    Bitmap sourceImage = ((BitmapDrawable)resultView.getDrawable()).getBitmap();
-                    Bitmap workingBitmap = Bitmap.createBitmap(sourceImage);
-                    Bitmap mutableBitmap = workingBitmap.copy(Bitmap.Config.ARGB_8888, true);
-                    VisionUtil.drawQuads(mutableBitmap, squares);
-                    resultView.setImageBitmap(mutableBitmap);
-                }
-            });*/
         } catch(InterruptedException e) {
             Log.e(TAG, Log.getStackTraceString(e));
         } catch(ExecutionException e) {
