@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -28,19 +27,16 @@ import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 
-import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.RunnableFuture;
 
 import graphics.epi.filesystemtree.Folder;
 import graphics.epi.filesystemtree.Items;
-import graphics.epi.utils.Geometry;
 import graphics.epi.vision.VisionAction;
 import graphics.epi.vision.VisionExecutor;
 import graphics.epi.vision.VisionListener;
-import graphics.epi.vision.VisionUtil;
-import graphics.epi.vision.analyze.SquareFinder;
+import graphics.epi.vision.operations.OpDeskew;
 
 public class OverviewActivity extends ActionBarActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks, FileSystemFragment.FileSystemCallbacks, VisionListener {
@@ -242,7 +238,7 @@ public class OverviewActivity extends ActionBarActivity
                         // launch async vision task
                         Log.d(TAG, "launching vision task");
                         Executor executor = new VisionExecutor();
-                        RunnableFuture task = new SquareFinder((VisionListener)this.getActivity(), yourSelectedImage);
+                        RunnableFuture task = new OpDeskew((VisionListener)this.getActivity(), yourSelectedImage);
                         executor.execute(task);
                         Log.d(TAG, "launched vision task");
                     }
@@ -283,7 +279,18 @@ public class OverviewActivity extends ActionBarActivity
     public void OnVisionActionComplete(VisionAction op) {
         // TODO result dispatcher
         try {
-            final Bundle results = (Bundle) op.get();
+            final Bitmap deskewed = (Bitmap)op.get();
+
+            // display result
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    ImageView resultView = (ImageView) findViewById(R.id.img_raw); // FIXME should be img_result
+                    resultView.setImageBitmap(deskewed);
+                }
+            });
+
+            /*final Bundle results = (Bundle) op.get();
 
             final List<Geometry.Quad> squares = results.getParcelableArrayList("squares");
             Log.d(TAG, "found " + squares.size() + " squares.");
@@ -302,7 +309,7 @@ public class OverviewActivity extends ActionBarActivity
                     VisionUtil.drawQuads(mutableBitmap, squares);
                     resultView.setImageBitmap(mutableBitmap);
                 }
-            });
+            });*/
         } catch(InterruptedException e) {
             Log.e(TAG, Log.getStackTraceString(e));
         } catch(ExecutionException e) {

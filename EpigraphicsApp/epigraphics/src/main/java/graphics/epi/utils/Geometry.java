@@ -3,7 +3,12 @@ package graphics.epi.utils;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import org.opencv.core.MatOfPoint;
+import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
+import org.opencv.imgproc.Imgproc;
+
+import java.util.List;
 
 public class Geometry {
     /**
@@ -11,6 +16,10 @@ public class Geometry {
      */
     public static class Quad implements Parcelable {
         private final Point[] points;
+
+        /*
+        Constructors
+         */
 
         public Quad(Point first, Point second, Point third, Point fourth) throws RepException {
             points = new Point[4];
@@ -31,6 +40,18 @@ public class Geometry {
                 this.points[i] = points[i].clone();
 
             checkRep();
+        }
+
+        /*
+        Methods
+         */
+
+        public MatOfPoint toMatOfPoint() {
+            return new MatOfPoint(points); // FIXME don't leak rep
+        }
+
+        public MatOfPoint2f toMatOfPoint2f() {
+            return new MatOfPoint2f(points); // FIXME don't leak rep
         }
 
         public Point[] getPoints() {
@@ -76,6 +97,10 @@ public class Geometry {
             }*/
         }
 
+        /*
+        Parcelable Implementation
+         */
+
         @Override
         public int describeContents() {
             return 0;
@@ -107,6 +132,25 @@ public class Geometry {
             for(int i = 0; i < 4; i++) {
                 points[i] = new Point(in.readDouble(), in.readDouble());
             }
+        }
+
+        /*
+        Static Methods
+         */
+
+        public static Quad largest(List<Quad> quads) {
+            Quad biggest = null;
+            double biggestArea = 0;
+            for(Quad quad: quads) {
+                double area = Imgproc.contourArea(quad.toMatOfPoint());
+
+                if(area > biggestArea) {
+                    biggest = quad;
+                    biggestArea = area;
+                }
+            }
+
+            return biggest;
         }
     }
 
