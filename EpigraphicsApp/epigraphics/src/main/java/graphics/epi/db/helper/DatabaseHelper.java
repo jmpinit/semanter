@@ -1,7 +1,8 @@
-package info.androidhive.sqlite.helper;
+package graphics.epi.db.helper;
 
-import info.androidhive.sqlite.model.Tag;
-import info.androidhive.sqlite.model.Todo;
+import graphics.epi.db.model.Note;
+import graphics.epi.db.model.Note;
+import graphics.epi.db.model.Note;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -18,362 +19,602 @@ import android.util.Log;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
-	// Logcat tag
-	private static final String LOG = "DatabaseHelper";
+    // Logcat tag
+    private static final String LOG = "DatabaseHelper";
 
-	// Database Version
-	private static final int DATABASE_VERSION = 1;
+    // Database Version
+    private static final int DATABASE_VERSION = 1;
 
-	// Database Name
-	private static final String DATABASE_NAME = "contactsManager";
+    // Database Name
+    private static final String DATABASE_NAME = "noteManager";
 
-	// Table Names
-	private static final String TABLE_TODO = "todos";
-	private static final String TABLE_TAG = "tags";
-	private static final String TABLE_TODO_TAG = "todo_tags";
+    // Table Names
+    private static final String TABLE_NOTE = "notes";
+    private static final String TABLE_FRAGMENT = "fragments";
+    private static final String TABLE_BOUND = "bounds";
+    private static final String TABLE_NOTE_FRAGMENT = "note_fragments";
+    private static final String TABLE_FRAGMENT_BOUND = "fragment_bounds";
 
-	// Common column names
-	private static final String KEY_ID = "id";
-	private static final String KEY_CREATED_AT = "created_at";
+    // Common column names
+    private static final String KEY_ID = "id";
+    private static final String KEY_CREATED_AT = "created_at";
+    private static final String KEY_PATH = "path";
 
-	// NOTES Table - column nmaes
-	private static final String KEY_TODO = "todo";
-	private static final String KEY_STATUS = "status";
+    // NOTES Table - column names
+    private static final String KEY_CLASS = "class";
+    private static final String KEY_SUBJECT = "subject";
+    private static final String KEY_PLAINTEXT = "plaintext";
+    private static final String KEY_KEYWORDS = "keywords";
+    private static final String KEY_NAME = "name";
+    private static final String KEY_WRITTEN_AT = "written_at";
 
-	// TAGS Table - column names
-	private static final String KEY_TAG_NAME = "tag_name";
+    // FRAGMENT Table - column names
 
-	// NOTE_TAGS Table - column names
-	private static final String KEY_TODO_ID = "todo_id";
-	private static final String KEY_TAG_ID = "tag_id";
+    // BOUNDS Table - column names
+    private static final String KEY_LEFT = "left";
+    private static final String KEY_RIGHT = "right";
+    private static final String KEY_TOP = "top";
+    private static final String KEY_BOTTOM = "bottom";
 
-	// Table Create Statements
-	// Todo table create statement
-	private static final String CREATE_TABLE_TODO = "CREATE TABLE "
-			+ TABLE_TODO + "(" + KEY_ID + " INTEGER PRIMARY KEY," + KEY_TODO
-			+ " TEXT," + KEY_STATUS + " INTEGER," + KEY_CREATED_AT
-			+ " DATETIME" + ")";
+    // NOTE_FRAGMENTS  & FRAGMENT_BOUND Table - column names
+    private static final String KEY_NOTE_ID = "note_id";
+    private static final String KEY_BOUND_ID = "bound_id";
+    private static final String KEY_FRAGMENT_ID = "fragment_id";
 
-	// Tag table create statement
-	private static final String CREATE_TABLE_TAG = "CREATE TABLE " + TABLE_TAG
-			+ "(" + KEY_ID + " INTEGER PRIMARY KEY," + KEY_TAG_NAME + " TEXT,"
-			+ KEY_CREATED_AT + " DATETIME" + ")";
 
-	// todo_tag table create statement
-	private static final String CREATE_TABLE_TODO_TAG = "CREATE TABLE "
-			+ TABLE_TODO_TAG + "(" + KEY_ID + " INTEGER PRIMARY KEY,"
-			+ KEY_TODO_ID + " INTEGER," + KEY_TAG_ID + " INTEGER,"
-			+ KEY_CREATED_AT + " DATETIME" + ")";
+    // Table Create Statements
+    // Note table create statement
+    private static final String CREATE_TABLE_NOTE = "CREATE TABLE "
+            + TABLE_NOTE + "("
+            + KEY_ID + " INTEGER PRIMARY KEY,"
+            + KEY_PATH + " TEXT,"
+            + KEY_CLASS + " TEXT,"
+            + KEY_SUBJECT + " TEXT,"
+            + KEY_PLAINTEXT + " TEXT,"
+            + KEY_KEYWORDS + " TEXT,"
+            + KEY_NAME + " TEXT,"
+            + KEY_CREATED_AT + " DATETIME,"
+            + KEY_WRITTEN_AT + " DATETIME"
+            + ")";
+    private static final String CREATE_TABLE_FRAGMENT = "CREATE TABLE "
+            + TABLE_FRAGMENT + "("
+            + KEY_ID + " INTEGER PRIMARY KEY,"
+            + KEY_PATH + " TEXT,"
+            + KEY_CREATED_AT + " DATETIME"
+            + ")";
 
-	public DatabaseHelper(Context context) {
-		super(context, DATABASE_NAME, null, DATABASE_VERSION);
-	}
+    private static final String CREATE_TABLE_BOUND = "CREATE TABLE "
+            + TABLE_BOUND + "("
+            + KEY_ID + " INTEGER PRIMARY KEY,"
+            + KEY_LEFT + " INTEGER,"
+            + KEY_RIGHT + " INTEGER,"
+            + KEY_TOP + " INTEGER,"
+            + KEY_BOTTOM + " INTEGER,"
+            + KEY_CREATED_AT + " DATETIME"
+            + ")";
+    // note_fragments table create statement
+    private static final String CREATE_TABLE_NOTE_FRAGMENTS = "CREATE TABLE "
+            + TABLE_NOTE_FRAGMENT + "("
+            + KEY_ID + " INTEGER PRIMARY KEY,"
+            + KEY_NOTE_ID + " INTEGER,"
+            + KEY_FRAGMENT_ID + " INTEGER,"
+            + KEY_CREATED_AT + " DATETIME" + ")";
+    // fragment_bounds table create statement
+    private static final String CREATE_TABLE_FRAGMENT_BOUNDS = "CREATE TABLE "
+            + TABLE_FRAGMENT_BOUND + "("
+            + KEY_ID + " INTEGER PRIMARY KEY,"
+            + KEY_FRAGMENT_ID + " INTEGER,"
+            + KEY_BOUND_ID + " INTEGER,"
+            + KEY_CREATED_AT + " DATETIME" + ")";
 
-	@Override
-	public void onCreate(SQLiteDatabase db) {
+    public DatabaseHelper(Context context) {
+        super(context, DATABASE_NAME, null, DATABASE_VERSION);
+    }
 
-		// creating required tables
-		db.execSQL(CREATE_TABLE_TODO);
-		db.execSQL(CREATE_TABLE_TAG);
-		db.execSQL(CREATE_TABLE_TODO_TAG);
-	}
+    @Override
+    public void onCreate(SQLiteDatabase db) {
 
-	@Override
-	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		// on upgrade drop older tables
-		db.execSQL("DROP TABLE IF EXISTS " + TABLE_TODO);
-		db.execSQL("DROP TABLE IF EXISTS " + TABLE_TAG);
-		db.execSQL("DROP TABLE IF EXISTS " + TABLE_TODO_TAG);
+        // creating required tables
+        db.execSQL(CREATE_TABLE_NOTE);
+        db.execSQL(CREATE_TABLE_FRAGMENT);
+        db.execSQL(CREATE_TABLE_BOUND);
+        db.execSQL(CREATE_TABLE_NOTE_FRAGMENTS);
+        db.execSQL(CREATE_TABLE_FRAGMENT_BOUNDS);
+    }
 
-		// create new tables
-		onCreate(db);
-	}
+    @Override
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        // on upgrade drop older tables
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_NOTE);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_FRAGMENT);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_BOUND);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_NOTE_FRAGMENT);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_FRAGMENT_BOUNDS);
 
-	// ------------------------ "todos" table methods ----------------//
+        // create new tables
+        onCreate(db);
+    }
 
-	/*
-	 * Creating a todo
-	 */
-	public long createToDo(Todo todo, long[] tag_ids) {
-		SQLiteDatabase db = this.getWritableDatabase();
+    // ------------------------ "todos" table methods ----------------//
 
-		ContentValues values = new ContentValues();
-		values.put(KEY_TODO, todo.getNote());
-		values.put(KEY_STATUS, todo.getStatus());
-		values.put(KEY_CREATED_AT, getDateTime());
+    /*
+     * Creating a todo
+     */
+    public long createNote(Note note, long[] fragment_ids) {
+        SQLiteDatabase db = this.getWritableDatabase();
 
-		// insert row
-		long todo_id = db.insert(TABLE_TODO, null, values);
+        ContentValues values = new ContentValues();
+        values.put(KEY_PATH, note.getPath());
+        values.put(KEY_CLASS, note.getClass());
+        values.put(KEY_SUBJECT, note.getSubject());
+        values.put(KEY_PLAINTEXT, note.getPlainText());
+        values.put(KEY_KEYWORDS, note.getKeywords());
+        values.put(KEY_NAME, note.getName());
+        values.put(KEY_WRITTEN_AT, note.getWrittenAt());
+        values.put(KEY_CREATED_AT, getDateTime());
 
-		// insert tag_ids
-		for (long tag_id : tag_ids) {
-			createTodoTag(todo_id, tag_id);
-		}
+        // insert row
+        long note_id = db.insert(TABLE_NOTE, null, values);
 
-		return todo_id;
-	}
+        // insert fragment_ids
+        for (long fragment_id : fragment_ids) {
+            createNoteFragment(note_id, fragment_id);
+        }
 
-	/*
-	 * get single todo
-	 */
-	public Todo getTodo(long todo_id) {
-		SQLiteDatabase db = this.getReadableDatabase();
+        return note_id;
+    }
 
-		String selectQuery = "SELECT  * FROM " + TABLE_TODO + " WHERE "
-				+ KEY_ID + " = " + todo_id;
+    /*
+     * get single todo
+     */
+    public Note getNote(long note_id) {
+        SQLiteDatabase db = this.getReadableDatabase();
 
-		Log.e(LOG, selectQuery);
+        String selectQuery = "SELECT  * FROM " + TABLE_NOTE + " WHERE "
+                + KEY_ID + " = " + note_id;
 
-		Cursor c = db.rawQuery(selectQuery, null);
+        Log.e(LOG, selectQuery);
 
-		if (c != null)
-			c.moveToFirst();
+        Cursor c = db.rawQuery(selectQuery, null);
 
-		Todo td = new Todo();
-		td.setId(c.getInt(c.getColumnIndex(KEY_ID)));
-		td.setNote((c.getString(c.getColumnIndex(KEY_TODO))));
-		td.setCreatedAt(c.getString(c.getColumnIndex(KEY_CREATED_AT)));
+        if (c != null)
+            c.moveToFirst();
 
-		return td;
-	}
+        Note td = new Note();
 
-	/**
-	 * getting all todos
-	 * */
-	public List<Todo> getAllToDos() {
-		List<Todo> todos = new ArrayList<Todo>();
-		String selectQuery = "SELECT  * FROM " + TABLE_TODO;
+        td.setId(c.getInt( c.getColumnIndex(KEY_ID) ));
+        td.setPath(c.getString( c.getColumnIndex(KEY_PATH) ));
+        td.setClass(c.getString( c.getColumnIndex(KEY_CLASS) ));
+        td.setSubject(c.getString( c.getColumnIndex(KEY_SUBJECT) ));
+        td.setPlainText(c.getString( c.getColumnIndex(KEY_PLAINTEXT) ));
+        td.setName(c.getString( c.getColumnIndex(KEY_NAME) ));
+        td.setKeywords(c.getString( c.getColumnIndex(KEY_KEYWORDS) ));
+        td.setWrittenAt(c.getString( c.getColumnIndex(KEY_WRITTEN_AT) ));
+        td.setCreatedAt(c.getString( c.getColumnIndex(KEY_CREATED_AT) ));
 
-		Log.e(LOG, selectQuery);
+        return td;
+    }
 
-		SQLiteDatabase db = this.getReadableDatabase();
-		Cursor c = db.rawQuery(selectQuery, null);
+    /**
+     * getting all notes
+     * */
+    public List<Note> getAllNotes() {
+        List<Note> notes = new ArrayList<Note>();
+        String selectQuery = "SELECT  * FROM " + TABLE_NOTE;
 
-		// looping through all rows and adding to list
-		if (c.moveToFirst()) {
-			do {
-				Todo td = new Todo();
-				td.setId(c.getInt((c.getColumnIndex(KEY_ID))));
-				td.setNote((c.getString(c.getColumnIndex(KEY_TODO))));
-				td.setCreatedAt(c.getString(c.getColumnIndex(KEY_CREATED_AT)));
+        Log.e(LOG, selectQuery);
 
-				// adding to todo list
-				todos.add(td);
-			} while (c.moveToNext());
-		}
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor c = db.rawQuery(selectQuery, null);
 
-		return todos;
-	}
+        // looping through all rows and adding to list
+        if (c.moveToFirst()) {
+            do {
+                Note td = new Note();
+                td.setId(c.getInt( c.getColumnIndex(KEY_ID) ));
+                td.setPath(c.getString( c.getColumnIndex(KEY_PATH) ));
+                td.setClass(c.getString( c.getColumnIndex(KEY_CLASS) ));
+                td.setSubject(c.getString( c.getColumnIndex(KEY_SUBJECT) ));
+                td.setPlainText(c.getString( c.getColumnIndex(KEY_PLAINTEXT) ));
+                td.setName(c.getString( c.getColumnIndex(KEY_NAME) ));
+                td.setKeywords(c.getString( c.getColumnIndex(KEY_KEYWORDS) ));
+                td.setWrittenAt(c.getString( c.getColumnIndex(KEY_WRITTEN_AT) ));
+                td.setCreatedAt(c.getString( c.getColumnIndex(KEY_CREATED_AT) ));
 
-	/**
-	 * getting all todos under single tag
-	 * */
-	public List<Todo> getAllToDosByTag(String tag_name) {
-		List<Todo> todos = new ArrayList<Todo>();
+                // adding to todo list
+                notes.add(td);
+            } while (c.moveToNext());
+        }
 
-		String selectQuery = "SELECT  * FROM " + TABLE_TODO + " td, "
-				+ TABLE_TAG + " tg, " + TABLE_TODO_TAG + " tt WHERE tg."
-				+ KEY_TAG_NAME + " = '" + tag_name + "'" + " AND tg." + KEY_ID
-				+ " = " + "tt." + KEY_TAG_ID + " AND td." + KEY_ID + " = "
-				+ "tt." + KEY_TODO_ID;
+        return notes;
+    }
 
-		Log.e(LOG, selectQuery);
+    /**
+     * getting all todos under single tag
+     * */
+    // public List<Todo> getAllToDosByTag(String tag_name) {
+    // 	List<Todo> todos = new ArrayList<Todo>();
 
-		SQLiteDatabase db = this.getReadableDatabase();
-		Cursor c = db.rawQuery(selectQuery, null);
+    // 	String selectQuery = "SELECT  * FROM " + TABLE_TODO + " td, "
+    // 			+ TABLE_TAG + " tg, " + TABLE_TODO_TAG + " tt WHERE tg."
+    // 			+ KEY_TAG_NAME + " = '" + tag_name + "'" + " AND tg." + KEY_ID
+    // 			+ " = " + "tt." + KEY_TAG_ID + " AND td." + KEY_ID + " = "
+    // 			+ "tt." + KEY_TODO_ID;
 
-		// looping through all rows and adding to list
-		if (c.moveToFirst()) {
-			do {
-				Todo td = new Todo();
-				td.setId(c.getInt((c.getColumnIndex(KEY_ID))));
-				td.setNote((c.getString(c.getColumnIndex(KEY_TODO))));
-				td.setCreatedAt(c.getString(c.getColumnIndex(KEY_CREATED_AT)));
+    // 	Log.e(LOG, selectQuery);
 
-				// adding to todo list
-				todos.add(td);
-			} while (c.moveToNext());
-		}
+    // 	SQLiteDatabase db = this.getReadableDatabase();
+    // 	Cursor c = db.rawQuery(selectQuery, null);
 
-		return todos;
-	}
+    // 	// looping through all rows and adding to list
+    // 	if (c.moveToFirst()) {
+    // 		do {
+    // 			Todo td = new Todo();
+    // 			td.setId(c.getInt((c.getColumnIndex(KEY_ID))));
+    // 			td.setNote((c.getString(c.getColumnIndex(KEY_TODO))));
+    // 			td.setCreatedAt(c.getString(c.getColumnIndex(KEY_CREATED_AT)));
 
-	/*
-	 * getting todo count
-	 */
-	public int getToDoCount() {
-		String countQuery = "SELECT  * FROM " + TABLE_TODO;
-		SQLiteDatabase db = this.getReadableDatabase();
-		Cursor cursor = db.rawQuery(countQuery, null);
+    // 			// adding to todo list
+    // 			todos.add(td);
+    // 		} while (c.moveToNext());
+    // 	}
 
-		int count = cursor.getCount();
-		cursor.close();
-
-		// return count
-		return count;
-	}
-
-	/*
-	 * Updating a todo
-	 */
-	public int updateToDo(Todo todo) {
-		SQLiteDatabase db = this.getWritableDatabase();
-
-		ContentValues values = new ContentValues();
-		values.put(KEY_TODO, todo.getNote());
-		values.put(KEY_STATUS, todo.getStatus());
-
-		// updating row
-		return db.update(TABLE_TODO, values, KEY_ID + " = ?",
-				new String[] { String.valueOf(todo.getId()) });
-	}
-
-	/*
-	 * Deleting a todo
-	 */
-	public void deleteToDo(long tado_id) {
-		SQLiteDatabase db = this.getWritableDatabase();
-		db.delete(TABLE_TODO, KEY_ID + " = ?",
-				new String[] { String.valueOf(tado_id) });
-	}
-
-	// ------------------------ "tags" table methods ----------------//
-
-	/*
-	 * Creating tag
-	 */
-	public long createTag(Tag tag) {
-		SQLiteDatabase db = this.getWritableDatabase();
-
-		ContentValues values = new ContentValues();
-		values.put(KEY_TAG_NAME, tag.getTagName());
-		values.put(KEY_CREATED_AT, getDateTime());
-
-		// insert row
-		long tag_id = db.insert(TABLE_TAG, null, values);
-
-		return tag_id;
-	}
-
-	/**
-	 * getting all tags
-	 * */
-	public List<Tag> getAllTags() {
-		List<Tag> tags = new ArrayList<Tag>();
-		String selectQuery = "SELECT  * FROM " + TABLE_TAG;
-
-		Log.e(LOG, selectQuery);
-
-		SQLiteDatabase db = this.getReadableDatabase();
-		Cursor c = db.rawQuery(selectQuery, null);
-
-		// looping through all rows and adding to list
-		if (c.moveToFirst()) {
-			do {
-				Tag t = new Tag();
-				t.setId(c.getInt((c.getColumnIndex(KEY_ID))));
-				t.setTagName(c.getString(c.getColumnIndex(KEY_TAG_NAME)));
-
-				// adding to tags list
-				tags.add(t);
-			} while (c.moveToNext());
-		}
-		return tags;
-	}
+    // 	return todos;
+    // }
 
 	/*
-	 * Updating a tag
+	 * getting note count
 	 */
-	public int updateTag(Tag tag) {
-		SQLiteDatabase db = this.getWritableDatabase();
+    public int getNoteCount() {
+        String countQuery = "SELECT  * FROM " + TABLE_NOTE;
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(countQuery, null);
 
-		ContentValues values = new ContentValues();
-		values.put(KEY_TAG_NAME, tag.getTagName());
+        int count = cursor.getCount();
+        cursor.close();
 
-		// updating row
-		return db.update(TABLE_TAG, values, KEY_ID + " = ?",
-				new String[] { String.valueOf(tag.getId()) });
-	}
+        // return count
+        return count;
+    }
 
-	/*
-	 * Deleting a tag
-	 */
-	public void deleteTag(Tag tag, boolean should_delete_all_tag_todos) {
-		SQLiteDatabase db = this.getWritableDatabase();
+    /*
+     * Updating a note
+     */
+    public int updateNote(Note note) {
+        SQLiteDatabase db = this.getWritableDatabase();
 
-		// before deleting tag
-		// check if todos under this tag should also be deleted
-		if (should_delete_all_tag_todos) {
-			// get all todos under this tag
-			List<Todo> allTagToDos = getAllToDosByTag(tag.getTagName());
+        ContentValues values = new ContentValues();
+        values.put(KEY_PATH, note.getPath());
+        values.put(KEY_CLASS, note.getClass());
+        values.put(KEY_SUBJECT, note.getSubject());
+        values.put(KEY_PLAINTEXT, note.getPlainText());
+        values.put(KEY_KEYWORDS, note.getKeywords());
+        values.put(KEY_NAME, note.getName());
+        values.put(KEY_WRITTEN_AT, note.getWrittenAt());
+        values.put(KEY_CREATED_AT, getDateTime());
 
-			// delete all todos
-			for (Todo todo : allTagToDos) {
-				// delete todo
-				deleteToDo(todo.getId());
-			}
-		}
+        // updating row
+        return db.update(TABLE_NOTE, values, KEY_ID + " = ?",
+                new String[] { String.valueOf(note.getId()) });
+    }
 
-		// now delete the tag
-		db.delete(TABLE_TAG, KEY_ID + " = ?",
-				new String[] { String.valueOf(tag.getId()) });
-	}
+    /*
+     * Deleting a note
+     */
+    public void deleteToDo(long note_id) {
+        //this should probably also delete associated fragments?
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_NOTE, KEY_ID + " = ?",
+                new String[] { String.valueOf(note_id) });
+    }
 
-	// ------------------------ "todo_tags" table methods ----------------//
+    // -------------------- "fragment" table methods ----------------//
 
-	/*
-	 * Creating todo_tag
-	 */
-	public long createTodoTag(long todo_id, long tag_id) {
-		SQLiteDatabase db = this.getWritableDatabase();
+    /*
+     * Creating fragment
+     */
+    public long createFragment(Fragment fragment) {
+        SQLiteDatabase db = this.getWritableDatabase();
 
-		ContentValues values = new ContentValues();
-		values.put(KEY_TODO_ID, todo_id);
-		values.put(KEY_TAG_ID, tag_id);
-		values.put(KEY_CREATED_AT, getDateTime());
+        ContentValues values = new ContentValues();
+        values.put(KEY_PATH, fragment.getPath());
+        values.put(KEY_CREATED_AT, getDateTime());
 
-		long id = db.insert(TABLE_TODO_TAG, null, values);
+        // insert row
+        long fragment_id = db.insert(TABLE_FRAGMENT, null, values);
 
-		return id;
-	}
+        return fragment_id;
+    }
 
-	/*
-	 * Updating a todo tag
-	 */
-	public int updateNoteTag(long id, long tag_id) {
-		SQLiteDatabase db = this.getWritableDatabase();
+    /**
+     * getting all fragments
+     * */
+    public List<Fragment> getAllFragments() {
+        List<Fragment> fragments = new ArrayList<Fragment>();
+        String selectQuery = "SELECT  * FROM " + TABLE_FRAGMENT;
 
-		ContentValues values = new ContentValues();
-		values.put(KEY_TAG_ID, tag_id);
+        Log.e(LOG, selectQuery);
 
-		// updating row
-		return db.update(TABLE_TODO, values, KEY_ID + " = ?",
-				new String[] { String.valueOf(id) });
-	}
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor c = db.rawQuery(selectQuery, null);
 
-	/*
-	 * Deleting a todo tag
-	 */
-	public void deleteToDoTag(long id) {
-		SQLiteDatabase db = this.getWritableDatabase();
-		db.delete(TABLE_TODO, KEY_ID + " = ?",
-				new String[] { String.valueOf(id) });
-	}
+        // looping through all rows and adding to list
+        if (c.moveToFirst()) {
+            do {
+                Fragment t = new Fragment();
+                t.setId(c.getInt((c.getColumnIndex(KEY_ID))));
+                t.setPath(c.getString(c.getColumnIndex(KEY_PATH)));
 
-	// closing database
-	public void closeDB() {
-		SQLiteDatabase db = this.getReadableDatabase();
-		if (db != null && db.isOpen())
-			db.close();
-	}
+                // adding to fragments list
+                fragments.add(t);
+            } while (c.moveToNext());
+        }
+        return fragments;
+    }
 
-	/**
-	 * get datetime
-	 * */
-	private String getDateTime() {
-		SimpleDateFormat dateFormat = new SimpleDateFormat(
-				"yyyy-MM-dd HH:mm:ss", Locale.getDefault());
-		Date date = new Date();
-		return dateFormat.format(date);
-	}
+    /**
+     * getting all fragments associated with a given note
+     * */
+    public List<Fragment> getAllFragmentsForNote(Note note) {
+        List<Fragment> fragments = new ArrayList<Fragment>();
+
+        String selectQuery = "SELECT  * FROM " + TABLE_TODO + " td, "
+                + TABLE_TAG + " tg, " + TABLE_TODO_TAG + " tt WHERE tg."
+                + KEY_TAG_NAME + " = '" + tag_name + "'" + " AND tg." + KEY_ID
+                + " = " + "tt." + KEY_TAG_ID + " AND td." + KEY_ID + " = "
+                + "tt." + KEY_TODO_ID; //this query most def won't work, but it should be similar
+
+        Log.e(LOG, selectQuery);
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor c = db.rawQuery(selectQuery, null);
+
+        // looping through all rows and adding to list
+        if (c.moveToFirst()) {
+            do {
+                Fragment t = new Fragment();
+                t.setId(c.getInt((c.getColumnIndex(KEY_ID))));
+                t.setPath(c.getString(c.getColumnIndex(KEY_PATH)));
+
+                // adding to fragments list
+                fragments.add(t);
+            } while (c.moveToNext());
+        }
+        return fragments;
+    }
+
+
+    /*
+     * Updating a fragment
+     */
+    public int updateFragment(Fragment fragment) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(KEY_PATH, fragment.getPath());
+
+        // updating row
+        return db.update(TABLE_FRAGMENT, values, KEY_ID + " = ?",
+                new String[] { String.valueOf(fragment.getId()) });
+    }
+
+    /*
+     * Deleting a fragment
+     */
+    public void deleteFragment(Fragment fragment) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        db.delete(TABLE_FRAGMENT, KEY_ID + " = ?",
+                new String[] { String.valueOf(fragment.getId()) });
+    }
+
+    // -------------------- "bound" table methods ----------------//
+
+    /*
+     * Creating bound
+     */
+    public long createBound(Bound bound) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(KEY_LEFT, bound.getLeft());
+        values.put(KEY_RIGHT, bound.getRight());
+        values.put(KEY_TOP, bound.getTop());
+        values.put(KEY_BOTTOM, bound.getBottom());
+        values.put(KEY_CREATED_AT, getDateTime());
+
+        // insert row
+        long bound_id = db.insert(TABLE_BOUND, null, values);
+
+        return bound_id;
+    }
+
+    /**
+     * getting all bounds
+     * */
+    public List<Bound> getAllBounds() {
+        List<Bound> bounds = new ArrayList<Bound>();
+        String selectQuery = "SELECT  * FROM " + TABLE_BOUND;
+
+        Log.e(LOG, selectQuery);
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor c = db.rawQuery(selectQuery, null);
+
+        // looping through all rows and adding to list
+        if (c.moveToFirst()) {
+            do {
+                Bound t = new Bound();
+                t.setId(c.getInt((c.getColumnIndex(KEY_ID))));
+                t.setLeft(c.getInt((c.getColumnIndex(KEY_LEFT))));
+                t.setRight(c.getInt((c.getColumnIndex(KEY_RIGHT))));
+                t.setTop(c.getInt((c.getColumnIndex(KEY_TOP))));
+                t.setBottom(c.getInt((c.getColumnIndex(KEY_BOTTOM))));
+
+                // adding to bounds list
+                bounds.add(t);
+            } while (c.moveToNext());
+        }
+        return bounds;
+    }
+
+    /**
+     * getting all bounds associated with a given fragment
+     * */
+    public List<Bound> getAllBoundsForFragment(Fragment fragment) {
+        List<Bound> bounds = new ArrayList<Bound>();
+
+        String selectQuery = "SELECT  * FROM " + TABLE_TODO + " td, "
+                + TABLE_TAG + " tg, " + TABLE_TODO_TAG + " tt WHERE tg."
+                + KEY_TAG_NAME + " = '" + tag_name + "'" + " AND tg." + KEY_ID
+                + " = " + "tt." + KEY_TAG_ID + " AND td." + KEY_ID + " = "
+                + "tt." + KEY_TODO_ID; //this query most def won't work, but it should be similar
+
+        Log.e(LOG, selectQuery);
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor c = db.rawQuery(selectQuery, null);
+
+        // looping through all rows and adding to list
+        if (c.moveToFirst()) {
+            do {
+                Bound t = new Bound();
+                t.setId(c.getInt((c.getColumnIndex(KEY_ID))));
+                t.setLeft(c.getInt((c.getColumnIndex(KEY_LEFT))));
+                t.setRight(c.getInt((c.getColumnIndex(KEY_RIGHT))));
+                t.setTop(c.getInt((c.getColumnIndex(KEY_TOP))));
+                t.setBottom(c.getInt((c.getColumnIndex(KEY_BOTTOM))));
+
+                // adding to bounds list
+                bounds.add(t);
+            } while (c.moveToNext());
+        }
+        return bounds;
+    }
+
+
+    /*
+     * Updating a bound
+     */
+    public int updateBound(Bound bound) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(KEY_LEFT, bound.getLeft());
+        values.put(KEY_RIGHT, bound.getRight());
+        values.put(KEY_TOP, bound.getTop());
+        values.put(KEY_BOTTOM, bound.getBottom());
+
+        // updating row
+        return db.update(TABLE_BOUND, values, KEY_ID + " = ?",
+                new String[] { String.valueOf(bound.getId()) });
+    }
+
+    /*
+     * Deleting a bound
+     */
+    public void deleteBound(Bound bound) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        db.delete(TABLE_BOUND, KEY_ID + " = ?",
+                new String[] { String.valueOf(bound.getId()) });
+    }
+
+    // ------------------------ "note_fragments" table methods ----------------//
+
+    /*
+     * Creating todo_tag
+     */
+    public long createNoteFragment(long note_id, long fragment_id) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(KEY_NOTE_ID, note_id);
+        values.put(KEY_FRAGMENT_ID, fragment_id);
+        values.put(KEY_CREATED_AT, getDateTime());
+
+        long id = db.insert(TABLE_NOTE_FRAGMENT, null, values);
+
+        return id;
+    }
+
+    /*
+     * Updating a todo tag
+     */
+    public int updateNoteFragment(long id, long fragment_id) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(KEY_FRAGMENT_ID, fragment_id);
+
+        // updating row
+        return db.update(TABLE_NOTE, values, KEY_ID + " = ?",
+                new String[] { String.valueOf(id) });
+    }
+
+    /*
+     * Deleting a todo tag
+     */
+    public void deleteNoteFragment(long id) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_NOTE, KEY_ID + " = ?",
+                new String[] { String.valueOf(id) });
+    }
+    // ------------------------ "fragment_bounds" table methods ----------------//
+
+    /*
+     * Creating todo_tag todo - > fragment tag -> bound
+     */
+    public long createFragmentBound(long fragment_id, long bound_id) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(KEY_FRAGMENT_ID, fragment_id);
+        values.put(KEY_BOUND_ID, bound_id);
+        values.put(KEY_CREATED_AT, getDateTime());
+
+        long id = db.insert(TABLE_FRAGMENT_BOUND, null, values);
+
+        return id;
+    }
+
+    /*
+     * Updating a todo tag
+     */
+    public int updateFragmentBound(long id, long bound_id) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(KEY_BOUND_ID, bound_id);
+
+        // updating row
+        return db.update(TABLE_FRAGMENT, values, KEY_ID + " = ?",
+                new String[] { String.valueOf(id) });
+    }
+
+    /*
+     * Deleting a todo tag
+     */
+    public void deleteFragmentBound(long id) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_FRAGMENT, KEY_ID + " = ?",
+                new String[] { String.valueOf(id) });
+    }
+
+    // closing database
+    public void closeDB() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        if (db != null && db.isOpen())
+            db.close();
+    }
+
+    /**
+     * get datetime
+     * */
+    private String getDateTime() {
+        SimpleDateFormat dateFormat = new SimpleDateFormat(
+                "yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+        Date date = new Date();
+        return dateFormat.format(date);
+    }
 }
