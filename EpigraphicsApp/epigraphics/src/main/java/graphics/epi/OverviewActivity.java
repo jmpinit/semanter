@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -13,11 +14,11 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -42,28 +43,11 @@ public class OverviewActivity extends ActionBarActivity
 
     static final String TAG = "epigraphics";
 
-    /**
-     * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
-     */
-    private NavigationDrawerFragment mNavigationDrawerFragment;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_overview);
-/*
-        mNavigationDrawerFragment = (NavigationDrawerFragment)
-                getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
 
-        // Set up the drawer.
-        mNavigationDrawerFragment.setUp(
-                R.id.navigation_drawer,
-                (DrawerLayout) findViewById(R.id.drawer_layout));
-                */
-    }
-
-    @Override
-    public void onNavigationDrawerItemSelected(int position) {
         ArrayList<String> demoArray = new ArrayList<String>();
 
         demoArray.add("/file1");
@@ -76,21 +60,31 @@ public class OverviewActivity extends ActionBarActivity
         demoArray.add("/18.100c/day2/hour5/file10");
         demoArray.add("/file6");
 
-        // update the main content by replacing fragments
         FragmentManager fragmentManager = getSupportFragmentManager();
-        /*fragmentManager.beginTransaction()
-                .replace(R.id.container, PlaceholderFragment.newInstance(position + 1))
-                .commit();*/
         fragmentManager.beginTransaction()
                 .replace(R.id.container, FileSystemFragment.newInstance(new Folder(null, "/", demoArray))).commit();
+    }
+
+    @Override
+    public void onNavigationDrawerItemSelected(int position) {
+
     }
 
     @Override
     public void fileSystemInteraction(Items next) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         if (next.isFile()) {
-            //TODO: handle file
-            System.out.println(next.toString());
+            /*
+            Opening file in the uglies way possible and uses Environment.DIRECTORY_DOWNLOADS as location
+             */
+            ImageView imageView = new ImageView(getApplicationContext());
+            ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+
+            String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "/" + next.toString();
+            Bitmap image = BitmapFactory.decodeFile(path);
+            imageView.setImageBitmap(image);
+            FrameLayout rl = (FrameLayout) findViewById(R.id.container);
+            rl.addView(imageView, lp);
         } else {
             if (next.toString().equals("/")) {
                 restoreActionBar(getTitle());
@@ -108,21 +102,6 @@ public class OverviewActivity extends ActionBarActivity
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
         actionBar.setDisplayShowTitleEnabled(true);
         actionBar.setTitle(title);
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        /*
-        if (!mNavigationDrawerFragment.isDrawerOpen()) {
-            // Only show items in the action bar relevant to this screen
-            // if the drawer is not showing. Otherwise, let the drawer
-            // decide what to show in the action bar.
-            getMenuInflater().inflate(R.menu.overview, menu);
-            restoreActionBar(getTitle());
-            return true;
-        }
-        */
-        return super.onCreateOptionsMenu(menu);
     }
 
     @Override
@@ -148,18 +127,6 @@ public class OverviewActivity extends ActionBarActivity
         private static final String ARG_SECTION_NUMBER = "section_number";
 
         private View rootView;
-
-        /**
-         * Returns a new instance of this fragment for the given section
-         * number.
-         */
-        public static PlaceholderFragment newInstance(int sectionNumber) {
-            PlaceholderFragment fragment = new PlaceholderFragment();
-            Bundle args = new Bundle();
-            args.putInt(ARG_SECTION_NUMBER, sectionNumber);
-            fragment.setArguments(args);
-            return fragment;
-        }
 
         public PlaceholderFragment() {
         }

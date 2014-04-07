@@ -43,7 +43,7 @@ public class FileSystemFragment extends Fragment implements AbsListView.OnItemCl
             fol = (Folder)getArguments().getSerializable(ARG_FOLDER);
         }
 
-        fileListAdapter = new ArrayAdapter<Items>(getActivity(), android.R.layout.simple_list_item_1, android.R.id.text1, fol.getItems());
+        fileListAdapter = new ArrayAdapter<Items>(getActivity(), R.layout.arrayadaptertext, fol.getItems());
     }
 
     @Override
