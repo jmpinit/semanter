@@ -11,6 +11,8 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
 
+import java.util.ArrayList;
+
 import graphics.epi.filesystemtree.Folder;
 import graphics.epi.filesystemtree.Items;
 
@@ -41,6 +43,10 @@ public class FileSystemFragment extends Fragment implements AbsListView.OnItemCl
 
         if (getArguments() != null) {
             fol = (Folder)getArguments().getSerializable(ARG_FOLDER);
+        }
+
+        if(fol == null) {
+            fol = new Folder(null, "/", new ArrayList<String>());
         }
 
         fileListAdapter = new ArrayAdapter<Items>(getActivity(), R.layout.arrayadaptertext, fol.getItems());
