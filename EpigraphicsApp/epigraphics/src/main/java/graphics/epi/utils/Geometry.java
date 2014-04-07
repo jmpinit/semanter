@@ -33,6 +33,15 @@ public class Geometry {
             checkRep();
         }
 
+        public Point[] getPoints() {
+            Point[] pointsCopy = new Point[4];
+            for(int i = 0; i < 4; i++) {
+                pointsCopy[i] = points[i].clone();
+            }
+
+            return pointsCopy;
+        }
+
         @Override
         public String toString() {
             String text = "Quad { ";

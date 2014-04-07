@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -27,8 +28,6 @@ import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
@@ -38,12 +37,10 @@ import graphics.epi.filesystemtree.Folder;
 import graphics.epi.filesystemtree.Items;
 import graphics.epi.utils.Geometry;
 import graphics.epi.vision.VisionAction;
-import graphics.epi.vision.analyze.SquareFinder;
-import graphics.epi.vision.operations.OpDummyLong;
 import graphics.epi.vision.VisionExecutor;
 import graphics.epi.vision.VisionListener;
-import graphics.epi.vision.operations.OpThreshold;
-import graphics.epi.vision.operations.VisionOp;
+import graphics.epi.vision.VisionUtil;
+import graphics.epi.vision.analyze.SquareFinder;
 
 public class OverviewActivity extends ActionBarActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks, FileSystemFragment.FileSystemCallbacks, VisionListener {
@@ -260,7 +257,6 @@ public class OverviewActivity extends ActionBarActivity
                 case LoaderCallbackInterface.SUCCESS:
                 {
                     Log.i(TAG, "OpenCV loaded successfully");
-                    //mOpenCvCameraView.enableView();
                 } break;
                 default:
                 {
@@ -289,20 +285,24 @@ public class OverviewActivity extends ActionBarActivity
         try {
             final Bundle results = (Bundle) op.get();
 
-            List<Geometry.Quad> squares = results.getParcelableArrayList("squares");
+            final List<Geometry.Quad> squares = results.getParcelableArrayList("squares");
             Log.d(TAG, "found " + squares.size() + " squares.");
             for(Geometry.Quad quad: squares) {
                 Log.d(TAG, quad.toString());
             }
 
             // display result
-            /*runOnUiThread(new Runnable() {
+            runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     ImageView resultView = (ImageView) findViewById(R.id.img_raw); // FIXME should be img_result
-                    resultView.setImageBitmap(resultImage);
+                    Bitmap sourceImage = ((BitmapDrawable)resultView.getDrawable()).getBitmap();
+                    Bitmap workingBitmap = Bitmap.createBitmap(sourceImage);
+                    Bitmap mutableBitmap = workingBitmap.copy(Bitmap.Config.ARGB_8888, true);
+                    VisionUtil.drawQuads(mutableBitmap, squares);
+                    resultView.setImageBitmap(mutableBitmap);
                 }
-            });*/
+            });
         } catch(InterruptedException e) {
             Log.e(TAG, Log.getStackTraceString(e));
         } catch(ExecutionException e) {

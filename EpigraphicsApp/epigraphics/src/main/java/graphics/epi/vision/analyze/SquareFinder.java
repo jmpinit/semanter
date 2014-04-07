@@ -40,8 +40,8 @@ import static org.opencv.imgproc.Imgproc.threshold;
 public class SquareFinder extends VisionAnalysis {
     private static final String TAG = "SquareFinder"; // FIXME assign via class name
 
-    private static final int SQUARE_SIZE = 100; // FIXME train on this somehow
-    private static final double THRESHOLD_COS = 0.1; // FIXME train on this somehow
+    private static final int SQUARE_SIZE = 25000; // FIXME train on this somehow
+    private static final double THRESHOLD_COS = 0.05; // FIXME train on this somehow
 
     public SquareFinder(VisionListener caller, Bitmap source) {
         super(caller, source);
@@ -124,6 +124,7 @@ public class SquareFinder extends VisionAnalysis {
 
                         if (maxCosine > THRESHOLD_COS) {
                             squares.add(new Geometry.Quad(approxArray));
+                            Log.d(TAG, "area = " + area);
                         }
                     }
                 }
