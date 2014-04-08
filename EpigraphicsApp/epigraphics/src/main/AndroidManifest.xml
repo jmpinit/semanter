@@ -10,21 +10,28 @@
         <activity
             android:name="graphics.epi.OverviewActivity"
             android:label="@string/app_name" >
-
+        </activity>
+        <activity
+            android:name="graphics.epi.NoteViewActivity"
+            android:parentActivityName="graphics.epi.DemoActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_activity_note_view"
+            android:theme="@style/Theme.AppCompat" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="graphics.epi.DemoActivity" />
+        </activity>
+        <activity
+            android:name="graphics.epi.DemoActivity"
+            android:label="@string/title_activity_demo" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name="graphics.epi.NoteViewActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize"
-            android:label="@string/title_activity_note_view"
-            android:theme="@style/FullscreenTheme" >
-        </activity>
     </application>
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 </manifest>

@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.concurrent.RunnableFuture;
 
 import graphics.epi.R;
-import graphics.epi.utils.Geometry;
+import graphics.epi.util.Geometry;
 import graphics.epi.vision.VisionAction;
 import graphics.epi.vision.VisionExecutor;
 import graphics.epi.vision.VisionListener;

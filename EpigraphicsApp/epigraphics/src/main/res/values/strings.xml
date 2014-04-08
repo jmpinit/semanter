@@ -7,13 +7,12 @@
     <string name="title_section3">Section 3</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="action_example">Example action</string>
     <string name="action_settings">Settings</string>
+    <string name="action_import">Import</string>
+    <string name="action_edit">Edit Note</string>
     <string name="title_activity_file_system">FileSystem</string>
     <string name="hello_world">Hello world!</string>
-    <string name="title_activity_note_view">NoteViewActivity</string>
-    <string name="dummy_button">Dummy Button</string>
-    <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="title_activity_note_view">Note</string>
     <string name="title_activity_metadata_edit">Edit Metadata</string>
     <string name="setting1">Setting 1:</string>
     <string name="setting2">Setting 2:</string>
@@ -23,5 +22,6 @@
     <string name="setting6">Setting 6:</string>
     <string name="setting7">Setting 7:</string>
     <string name="setting8">Setting 8:</string>
+    <string name="title_activity_demo">Semanter</string>
 
 </resources>

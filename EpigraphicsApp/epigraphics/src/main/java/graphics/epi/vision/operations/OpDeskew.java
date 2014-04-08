@@ -7,12 +7,13 @@ import android.util.Log;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
+import org.opencv.core.Rect;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
 import java.util.List;
 
-import graphics.epi.utils.Geometry;
+import graphics.epi.util.Geometry;
 import graphics.epi.vision.VisionAction;
 import graphics.epi.vision.VisionListener;
 import graphics.epi.vision.analyze.SquareFinder;
@@ -69,9 +70,15 @@ public class OpDeskew extends VisionOp implements VisionListener {
         Mat deskewed = new Mat();
         Imgproc.warpPerspective(imageMat, deskewed, transformation, new Size(imageMat.width(), imageMat.height()));
 
+        // crop to just note
+        Rect noteRegion = new Rect(0, 0, (int)paperWidth, (int)paperHeight);
+        Mat croppedRef = new Mat(deskewed, noteRegion);
+        Mat croppedMat = new Mat(croppedRef.width(), croppedRef.height(), croppedRef.type());
+        croppedRef.copyTo(croppedMat);
+
         // image out of OpenCV
-        result = Bitmap.createBitmap(source);
-        matToBitmap(deskewed, result);
+        result = Bitmap.createBitmap(noteRegion.width, noteRegion.height, source.getConfig());
+        matToBitmap(croppedMat, result);
 
         finish();
     }

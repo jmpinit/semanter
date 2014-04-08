@@ -9,7 +9,7 @@ import org.opencv.core.Point;
 
 import java.util.List;
 
-import graphics.epi.utils.Geometry;
+import graphics.epi.util.Geometry;
 
 public class VisionUtil {
     public static void drawQuad(Bitmap image, Geometry.Quad quad) {

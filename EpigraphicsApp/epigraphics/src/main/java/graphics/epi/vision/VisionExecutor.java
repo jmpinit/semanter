@@ -1,10 +1,7 @@
 package graphics.epi.vision;
 
-import android.util.Log;
-
-import java.util.ArrayDeque;
-import java.util.Queue;
-import java.util.concurrent.AbstractExecutorService;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Executor;
 
 /**
@@ -13,12 +10,22 @@ import java.util.concurrent.Executor;
 public class VisionExecutor implements Executor {
     final static String TAG = "VisionExecutor";
 
-    final Queue tasks = new ArrayDeque();
-    Runnable active;
+    private Map<Runnable, Object> jobs;
+
+    public VisionExecutor() {
+        jobs = new HashMap<Runnable, Object>();
+    }
 
     public synchronized void execute(final Runnable r) {
         Thread executingThread = new Thread(r);
         executingThread.start();
+    }
+
+    public synchronized void execute(Object client, final Runnable r) {
+        Thread executingThread = new Thread(r);
+        executingThread.start();
+
+        jobs.put(r, client);
 
         // TODO intelligent scheduling
         /*tasks.offer(new Runnable() {
@@ -36,9 +43,7 @@ public class VisionExecutor implements Executor {
         }*/
     }
 
-    protected synchronized void scheduleNext() {
-        if((active = (Runnable)tasks.poll()) != null) {
-            execute(active);
-        }
+    public Object getClient(VisionAction action) {
+        return jobs.get(action);
     }
 }

@@ -4,7 +4,7 @@ import android.test.AndroidTestCase;
 
 import org.opencv.core.Point;
 
-import graphics.epi.utils.Geometry;
+import graphics.epi.util.Geometry;
 
 public class GeometryTest extends AndroidTestCase {
     public void testLineSegmentCollision() throws Exception {

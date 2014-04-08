@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import graphics.epi.utils.Geometry;
+import graphics.epi.util.Geometry;
 import graphics.epi.vision.VisionListener;
 
 import static org.opencv.imgproc.Imgproc.CHAIN_APPROX_SIMPLE;

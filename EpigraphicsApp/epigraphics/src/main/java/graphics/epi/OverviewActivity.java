@@ -1,47 +1,25 @@
 package graphics.epi;
 
-import android.app.Activity;
 import android.content.Intent;
-import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
-import java.util.concurrent.RunnableFuture;
 
 import graphics.epi.filesystemtree.Folder;
 import graphics.epi.filesystemtree.Items;
 import graphics.epi.vision.VisionAction;
-import graphics.epi.vision.operations.OpDummyLong;
-import graphics.epi.vision.VisionExecutor;
 import graphics.epi.vision.VisionListener;
-import graphics.epi.vision.operations.VisionOp;
 
 public class OverviewActivity extends FragmentActivity
         implements FileSystemFragment.FileSystemCallbacks, VisionListener {
@@ -89,7 +67,7 @@ public class OverviewActivity extends FragmentActivity
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_import) {
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -135,13 +113,13 @@ public class OverviewActivity extends FragmentActivity
             Log.d(TAG, "got result");
 
             // display result
-            runOnUiThread(new Runnable() {
+            /*runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     ImageView resultView = (ImageView) findViewById(R.id.img_raw); // FIXME should be img_result
                     resultView.setImageBitmap(resultImage);
                 }
-            });
+            });*/
         } catch(InterruptedException e) {
             Log.e(TAG, Log.getStackTraceString(e));
         } catch(ExecutionException e) {
