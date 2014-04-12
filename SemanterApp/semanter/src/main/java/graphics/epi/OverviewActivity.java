@@ -24,7 +24,7 @@ import graphics.epi.vision.VisionListener;
 public class OverviewActivity extends FragmentActivity
         implements FileSystemFragment.FileSystemCallbacks, VisionListener {
 
-    static final String TAG = "epigraphics";
+    static final String TAG = "semanter";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
