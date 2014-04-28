@@ -23,5 +23,6 @@
     <string name="setting7">Setting 7:</string>
     <string name="setting8">Setting 8:</string>
     <string name="title_activity_demo">Semanter</string>
+    <string name="title_activity_navigator">Semanter</string>
 
 </resources>
