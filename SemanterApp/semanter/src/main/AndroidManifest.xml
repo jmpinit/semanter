@@ -22,7 +22,7 @@
                 android:value="graphics.epi.DemoActivity" />
         </activity>
         <activity
-            android:name="graphics.epi.DemoActivity"
+            android:name="graphics.epi.OverviewActivity"
             android:label="@string/title_activity_demo" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
