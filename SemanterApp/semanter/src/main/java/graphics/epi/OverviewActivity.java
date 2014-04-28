@@ -42,6 +42,7 @@ public class OverviewActivity extends FragmentActivity
         demoArray.add("/18.100c/day2/file9");
         demoArray.add("/18.100c/day2/hour5/file10");
         demoArray.add("/file6");
+        Log.d("array",demoArray.toString());
 
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragOp = fragmentManager.beginTransaction();
@@ -54,11 +55,17 @@ public class OverviewActivity extends FragmentActivity
         if (next.isFile()) {
             //TODO: handle file
             System.out.println(next.toString());
+            launchView(next.toString());
         } else {
             fragmentManager.beginTransaction()
                     .replace(R.id.container, FileSystemFragment.newInstance((Folder) next))
                     .commit();
         }
+    }
+
+    private void launchView(String name) {
+        Log.d("launchView", "Launching View...");
+        Log.d("Note Name", name);
     }
 
     @Override
