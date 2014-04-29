@@ -28,6 +28,7 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import org.json.JSONObject;
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
@@ -142,6 +143,19 @@ public class OverviewActivity extends FragmentActivity
         return super.onOptionsItemSelected(item);
     }
 
+    public JSONObject getJsonArray(ArrayList notes) {
+        for (Note note : notes) {
+
+        }
+
+        return json
+    }
+
+    public void save(notes) {
+        json = function(notes);
+        saveJsonToFile(json)
+    }
+
     protected void onActivityResult(int requestCode, int resultCode, Intent imageReturnedIntent) {
         super.onActivityResult(requestCode, resultCode, imageReturnedIntent);
 
@@ -254,11 +268,21 @@ public class OverviewActivity extends FragmentActivity
         private VisionAction processing;
         public Bitmap thumbnail;
 
-        Note(String name, Uri source, VisionAction processing) {
+        Note(String name, Uri source, VisionAction processing, String date) {
             this.name = name;
             this.source = source;
             this.processing = processing;
+            this.date = date
         }
+
+        toJson(){
+            JSONObject object = new JSONObject();
+            object.put("name", this.name);
+            object.put("class", this.source);
+            object.put("date", this.date);
+            return object
+        }
+
 
         public String getName() {
             return name;
