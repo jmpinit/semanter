@@ -28,6 +28,7 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
@@ -144,16 +145,19 @@ public class OverviewActivity extends FragmentActivity
     }
 
     public JSONObject getJsonArray(ArrayList notes) {
-        for (Note note : notes) {
+        JSONArray jsonArray = new JSONArray();
 
+        for (Note note : notes) {
+            jsonArray.put(note.toJson())
         }
 
-        return json
+        return jsonArray
     }
 
     public void save(notes) {
-        json = function(notes);
-        saveJsonToFile(json)
+        jsonFile = new File(getFilesDir(), JSON_FILENAME);
+        JSONArray noteArray = getJsonArray(notes);
+
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent imageReturnedIntent) {
