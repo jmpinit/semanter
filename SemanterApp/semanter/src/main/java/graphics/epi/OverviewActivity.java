@@ -27,6 +27,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
+import android.text.format.Time;
 
 import org.json.JSONObject;
 import org.opencv.android.BaseLoaderCallback;
@@ -266,21 +267,27 @@ public class OverviewActivity extends FragmentActivity
         private String name;
         private Uri source, processed;
         private VisionAction processing;
+        private Time date;
         public Bitmap thumbnail;
 
         Note(String name, Uri source, VisionAction processing, String date) {
             this.name = name;
             this.source = source;
             this.processing = processing;
-            this.date = date
+            this.date = new Time();
+            this.date.setToNow();
         }
 
-        toJson(){
+        public JSONObject toJson(){
             JSONObject object = new JSONObject();
-            object.put("name", this.name);
-            object.put("class", this.source);
-            object.put("date", this.date);
-            return object
+            try {
+                object.put("name", this.name);
+                object.put("source", this.source);
+                object.put("date", this.date);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return object;
         }
 
 
