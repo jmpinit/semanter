@@ -76,7 +76,6 @@ public class OverviewActivity extends FragmentActivity
         demoArray.add("/18.100c/day2/file9");
         demoArray.add("/18.100c/day2/hour5/file10");
         demoArray.add("/file6");
-        Log.d("array",demoArray.toString());
 
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragOp = fragmentManager.beginTransaction();
@@ -170,7 +169,6 @@ public class OverviewActivity extends FragmentActivity
         Log.d("launchView", "Launching View...");
         Log.d("Note Name", name);
     }
-
 
     /*
     Note List

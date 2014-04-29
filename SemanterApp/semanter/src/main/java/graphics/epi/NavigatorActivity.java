@@ -9,6 +9,8 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Base64;
 import android.util.JsonReader;
@@ -41,6 +43,8 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
+import graphics.epi.filesystemtree.Folder;
+import graphics.epi.filesystemtree.Items;
 import graphics.epi.vision.VisionAction;
 import graphics.epi.vision.VisionExecutor;
 import graphics.epi.vision.VisionListener;
@@ -48,7 +52,7 @@ import graphics.epi.vision.operations.OpDeskew;
 
 import static org.opencv.android.Utils.bitmapToMat;
 
-public class NavigatorActivity extends ActionBarActivity implements VisionListener {
+public class NavigatorActivity extends ActionBarActivity implements VisionListener, FileSystemFragment.FileSystemCallbacks {
     private static final String TAG = "NavigatorActivity";
 
     private static final String JSON_FILENAME = "notedata.json";
@@ -58,10 +62,6 @@ public class NavigatorActivity extends ActionBarActivity implements VisionListen
     // data
     private VisionExecutor cvExecutor;
     private List<Note> notes;
-
-    // views
-    private ListView noteList;
-    private NoteListAdapter noteListAdapter;
 
     // data
     private File jsonFile;
@@ -75,11 +75,6 @@ public class NavigatorActivity extends ActionBarActivity implements VisionListen
 
         notes = new ArrayList<Note>();
 
-        noteList = (ListView)findViewById(R.id.list_note);
-        noteListAdapter = new NoteListAdapter(this, R.layout.demo_row, notes);
-        noteList.setAdapter(noteListAdapter);
-
-        final Context context = this;
         /*noteList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -140,6 +135,23 @@ public class NavigatorActivity extends ActionBarActivity implements VisionListen
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        ArrayList<String> demoArray = new ArrayList<String>();
+
+        demoArray.add("/file1");
+        demoArray.add("/18.06/file2");
+        demoArray.add("/18.06/file3");
+        demoArray.add("/18.100c/file4");
+        demoArray.add("/18.100c/file5");
+        demoArray.add("/18.100c/day1/file8");
+        demoArray.add("/18.100c/day2/file9");
+        demoArray.add("/18.100c/day2/hour5/file10");
+        demoArray.add("/file6");
+        Log.d("array",demoArray.toString());
+
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragOp = fragmentManager.beginTransaction();
+        fragOp.replace(R.id.container, FileSystemFragment.newInstance(new Folder(null, "/", demoArray))).commit();
     }
 
     @Override
@@ -181,41 +193,16 @@ public class NavigatorActivity extends ActionBarActivity implements VisionListen
         }
     }
 
-    /*
-    Note List
-     */
-    class NoteListAdapter extends ArrayAdapter<Note> {
-        public NoteListAdapter(Context context, int textViewResourceId) {
-            super(context, textViewResourceId);
-        }
-
-        public NoteListAdapter(Context context, int resource, List<Note> items) {
-            super(context, resource, items);
-        }
-
-        @Override
-        public View getView(int position, View rawView, ViewGroup parent) {
-            if(rawView == null) {
-                LayoutInflater inflater;
-                inflater = LayoutInflater.from(getContext());
-                rawView = inflater.inflate(R.layout.demo_row, null);
-            }
-
-            Note note = getItem(position);
-
-            if(note != null) {
-                ImageView thumbView = (ImageView) rawView.findViewById(R.id.note_thumbnail);
-                ProgressBar progress = (ProgressBar) rawView.findViewById(R.id.demo_progress);
-
-                thumbView.setImageBitmap(note.thumbnail);
-
-                thumbView.setEnabled(note.isReady());
-                if(note.isReady()) {
-                    progress.setVisibility(View.GONE);
-                }
-            }
-
-            return rawView;
+    @Override
+    public void fileSystemInteraction(Items next) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        if (next.isFile()) {
+            //TODO: handle file
+            System.out.println(next.toString());
+        } else {
+            fragmentManager.beginTransaction()
+                    .replace(R.id.container, FileSystemFragment.newInstance((Folder) next))
+                    .commit();
         }
     }
 
@@ -253,8 +240,8 @@ public class NavigatorActivity extends ActionBarActivity implements VisionListen
         cvExecutor.execute(newNote, processing);
 
         // add to list of notes
-        notes.add(newNote);
-        noteListAdapter.notifyDataSetChanged();
+        //notes.add(newNote);
+        //noteListAdapter.notifyDataSetChanged();
     }
 
     class Note {
@@ -374,18 +361,16 @@ public class NavigatorActivity extends ActionBarActivity implements VisionListen
 
     @Override
     public void OnVisionActionComplete(VisionAction op) {
-        Log.d(TAG, "op completed");
-
         Note client = (Note)cvExecutor.getClient(op);
         client.processingFinished();
 
-        final NoteListAdapter adapter = noteListAdapter;
+        /*final NoteListAdapter adapter = noteListAdapter;
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 adapter.notifyDataSetChanged();
             }
-        });
+        });*/
 
         // TODO result dispatcher
         /*try {

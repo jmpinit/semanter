@@ -84,7 +84,6 @@ public class FileSystemFragment extends Fragment implements AbsListView.OnItemCl
         mListener = null;
     }
 
-
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         if (null != mListener) {
