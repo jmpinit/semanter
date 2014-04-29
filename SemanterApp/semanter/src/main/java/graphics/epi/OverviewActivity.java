@@ -8,12 +8,13 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.provider.MediaStore;
-import android.support.v7.app.ActionBarActivity;
+import android.text.format.Time;
 import android.util.Base64;
+import android.util.JsonWriter;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -21,19 +22,21 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
-import android.widget.Toast;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.core.Mat;
 
+import java.io.File;
 import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,6 +53,7 @@ import static org.opencv.android.Utils.bitmapToMat;
 public class OverviewActivity extends FragmentActivity
         implements FileSystemFragment.FileSystemCallbacks, VisionListener {
 
+    private static final String JSON_FILENAME = "notedata.json";
     static final String TAG = "semanter";
 
     // data
@@ -139,6 +143,36 @@ public class OverviewActivity extends FragmentActivity
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public JSONArray getJsonArray(ArrayList<Note> notes) {
+        JSONArray jsonArray = new JSONArray();
+
+        for (Note note : notes) {
+            jsonArray.put(note.toJson());
+        }
+
+        return jsonArray;
+    }
+
+    public void save(ArrayList<Note> notes) {
+        File jsonFile = new File(getFilesDir(), JSON_FILENAME);
+        JSONArray noteArray = getJsonArray(notes);
+
+        //if(!jsonFile.exists()) {
+            try {
+                // create the file
+                FileOutputStream jsonStream = new FileOutputStream(jsonFile);
+                JsonWriter jsonWriter = new JsonWriter(new OutputStreamWriter(jsonStream, "UTF-8"));
+
+                jsonWriter.value(noteArray.toString());
+
+                jsonWriter.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+      //  }
+
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent imageReturnedIntent) {
@@ -250,13 +284,29 @@ public class OverviewActivity extends FragmentActivity
         private String name;
         private Uri source, processed;
         private VisionAction processing;
+        private Time date;
         public Bitmap thumbnail;
 
-        Note(String name, Uri source, VisionAction processing) {
+        Note(String name, Uri source, VisionAction processing, String date) {
             this.name = name;
             this.source = source;
             this.processing = processing;
+            this.date = new Time();
+            this.date.setToNow();
         }
+
+        public JSONObject toJson(){
+            JSONObject object = new JSONObject();
+            try {
+                object.put("name", this.name);
+                object.put("source", this.source);
+                object.put("date", this.date);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return object;
+        }
+
 
         public String getName() {
             return name;
