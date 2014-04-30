@@ -4,9 +4,12 @@ html
         title= "labeller"
 
         meta(name="viewport" content="width=device-width, initial-scale=1.0")
-        link(href="css/bootstrap.min.css" rel="stylesheet" media="screen")
 
+        link(href="css/bootstrap.min.css" rel="stylesheet" media="screen")
+        link(href="css/progressjs.min.css" rel="stylesheet" media="screen")
+        
         script(src='//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js')
+        script(src='/js/progress.min.js')
 
     body(onload="start()")
         div.container#parent
@@ -82,8 +85,11 @@ html
 
         script(type="text/javascript").
             var imageName = "phone_bad.jpg";
-            var imageUrl = "/corpus/" + imageName;
             var IMG_WIDTH = $('#parent').width();
+
+            function imageUrl(name) {
+                return "/corpus/" + name;
+            }
 
             function loadCanvas(dataURL) {
                 canvas = document.getElementById('imageview');
@@ -102,6 +108,16 @@ html
 
         script(type="text/javascript").
             function start() {
-                loadCanvas(imageUrl);
                 canvas = $('#imageview')[0];
+
+                progressJs().start();
+                $.get("/progress", function( data ) {
+                    progressJs().set(data['progress']);
+                });
+
+                $.get("/random", function( data ) {
+                    imageName = data['name'];
+                    loadCanvas(imageUrl(imageName));
+                });
             }
+
