@@ -1,0 +1,107 @@
+doctype html
+html
+    head
+        title= "labeller"
+
+        meta(name="viewport" content="width=device-width, initial-scale=1.0")
+        link(href="css/bootstrap.min.css" rel="stylesheet" media="screen")
+
+        script(src='//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js')
+
+    body(onload="start()")
+        div.container#parent
+            h1 Labeller
+            hr
+            input#submit(type="submit", value="Submit Data")
+            hr
+            canvas#imageview
+            hr
+
+        <!-- communications -->
+        script(type="text/javascript").
+            $('#submit').click(function() {
+                $.ajax({
+                    type: "POST",
+                    url: "/submit/" + imageName,
+                    contentType: "application/json",
+                    data: JSON.stringify(bbox)
+                });
+            });
+            
+        script(type="text/javascript").
+            var bbox = null;
+
+            function Point(x, y) {
+                this.x = x;
+                this.y = y;
+            }
+
+            function BoundingBox(points) {
+                if(typeof points === 'undefined') {
+                    this.points = [];
+                } else {
+                    this.points = points;
+                }
+            }
+
+            BoundingBox.prototype = {
+                render: function(ctx) {
+                    ctx.beginPath();
+
+                    ctx.strokeStyle = "#F00";
+                    ctx.lineWidth = 4;
+                    ctx.moveTo(this.points[0].x, this.points[0].y);
+                    for(var i = 0; i < this.points.length; i++) {
+                        var pt = this.points[i];
+                        var next_pt = this.points[(i+1)%this.points.length];
+                        
+                        ctx.lineTo(pt.x, pt.y);
+                    }
+
+                    ctx.stroke();
+                }
+            }
+
+            function redraw() {
+                var ctx = canvas.getContext('2d');
+                bbox.render(ctx);
+            }
+
+            $('#imageview').click(function(e) {
+                var offset = $(this).offset();
+                var x = e.pageX - offset.left;
+                var y = e.pageY - offset.top;
+
+                if(bbox == null)
+                    bbox = new BoundingBox();
+
+                bbox.points.push(new Point(x, y));
+
+                redraw();
+            });
+
+        script(type="text/javascript").
+            var imageName = "phone_bad.jpg";
+            var imageUrl = "/corpus/" + imageName;
+            var IMG_WIDTH = $('#parent').width();
+
+            function loadCanvas(dataURL) {
+                canvas = document.getElementById('imageview');
+                var context = canvas.getContext('2d');
+
+                // load image from data url
+                var imageObj = new Image();
+                imageObj.onload = function() {
+                    canvas.width = this.width;
+                    canvas.height = this.height;
+                    context.drawImage(this, 0, 0, IMG_WIDTH, IMG_WIDTH * imageObj.height / imageObj.width);
+                };
+
+                imageObj.src = dataURL;
+            }
+
+        script(type="text/javascript").
+            function start() {
+                loadCanvas(imageUrl);
+                canvas = $('#imageview')[0];
+            }
