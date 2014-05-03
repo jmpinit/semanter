@@ -29,6 +29,8 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
@@ -97,44 +99,6 @@ public class NavigatorActivity extends ActionBarActivity implements VisionListen
                 }
             }
         });*/
-
-        jsonFile = new File(getFilesDir(), JSON_FILENAME);
-        if(!jsonFile.exists()) {
-            try {
-                // create the file
-                FileOutputStream jsonStream = new FileOutputStream(jsonFile);
-                JsonWriter jsonWriter = new JsonWriter(new OutputStreamWriter(jsonStream, "UTF-8"));
-                jsonWriter.setIndent("\t");
-
-                jsonWriter.beginObject();
-                jsonWriter.name("hello").value("world");
-                jsonWriter.endObject();
-
-                jsonWriter.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-        // read out JSON data
-        try {
-            FileInputStream jsonStream = new FileInputStream(jsonFile);
-            JsonReader reader = new JsonReader(new InputStreamReader(jsonStream, "UTF-8"));
-
-            try {
-                reader.beginObject();
-                while (reader.hasNext()) {
-                    String name = reader.nextName();
-                    String value = reader.nextString();
-                    Log.d("JSON TEST", name + " : " + value);
-                }
-                reader.endObject();
-            } finally {
-                reader.close();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
         ArrayList<String> demoArray = new ArrayList<String>();
 
@@ -242,101 +206,6 @@ public class NavigatorActivity extends ActionBarActivity implements VisionListen
         // add to list of notes
         //notes.add(newNote);
         //noteListAdapter.notifyDataSetChanged();
-    }
-
-    class Note {
-        private String name;
-        private Uri source, processed;
-        private VisionAction processing;
-        public Bitmap thumbnail;
-
-        Note(String name, Uri source, VisionAction processing) {
-            this.name = name;
-            this.source = source;
-            this.processing = processing;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public boolean isReady() {
-            return processing.isDone();
-        }
-
-        public Uri getProcessed() {
-            return processed;
-        }
-
-        public void processingFinished() {
-            try {
-                Bitmap result = (Bitmap) processing.get();
-
-                // generate filename
-                byte[] hashBytes = ByteBuffer.allocate(4).putInt(result.hashCode()).array();
-                processed = Uri.parse("/sdcard/Download/" + Base64.encodeToString(hashBytes, Base64.URL_SAFE).trim() + ".png");
-
-                // save to file
-                FileOutputStream out = null;
-                try {
-                    out = new FileOutputStream(processed.getPath());
-                    result.compress(Bitmap.CompressFormat.PNG, 90, out);
-                    Log.d(TAG, "saved to " + processed);
-                } catch (Exception e) {
-                    Log.e(TAG, Log.getStackTraceString(e));
-                } finally {
-                    try{
-                        out.close();
-                    } catch(Throwable ignore) {}
-                }
-
-                double sx = noteList.getWidth();
-                double sy = (noteList.getWidth() / result.getWidth()) * result.getHeight();
-                interestingThumbnail(Bitmap.createScaledBitmap(result, (int)sx, (int)sy, false));
-            } catch(Exception e) {
-                Log.d(TAG, Log.getStackTraceString(e));
-            }
-        }
-
-        private void interestingThumbnail(Bitmap image) {
-            // image into OpenCV
-            Mat imageMat = new Mat();
-            bitmapToMat(image, imageMat);
-
-            // find slice of interest
-            /*Mat rowSums = new Mat(imageMat.height(), 1, CvType.CV_16U);
-            for(int y = (int)(0.1*image.getHeight()); y < image.getHeight(); y++) {
-                Mat row = new Mat(imageMat, new Rect(0, 0, imageMat.width(), imageMat.height()));
-                rowSums.put(y, 1, (int)Core.sumElems(row).val[0]);
-            }
-
-            final int binSize = 32;
-            double current = 0;
-            int startPos = 0;
-            for(int y = 0; y < rowSums.cols() - binSize; y++) {
-                Mat binned = new Mat(rowSums, new Rect(y, 0, binSize, 1));
-                double average = Core.sumElems(binned).val[0] / binSize;
-
-                if(average > current)
-                    startPos = y;
-                current = average;
-            }
-
-            // ensure not out of bounds
-            if(startPos > imageMat.height() - binSize) startPos = imageMat.height() - binSize;
-
-            // get slice of interest
-            Rect roi = new Rect(0, startPos, imageMat.width(), binSize);
-            Mat croppedRef = new Mat(imageMat, roi);
-            Mat croppedMat = new Mat(croppedRef.width(), croppedRef.height(), croppedRef.type());
-            croppedRef.copyTo(croppedMat);*/
-
-            // image out of OpenCV
-            //thumbnail = Bitmap.createBitmap(roi.width, roi.height, image.getConfig());
-            thumbnail = Bitmap.createBitmap(imageMat.width(), 64, image.getConfig());
-            thumbnail.eraseColor(Color.argb(255, (int)(Math.random()*255), (int)(Math.random()*255), (int)(Math.random()*255)));
-            //matToBitmap(croppedRef, thumbnail);
-        }
     }
 
     /*
