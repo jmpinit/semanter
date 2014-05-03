@@ -53,7 +53,7 @@ public class TagView extends LinearLayout implements TagEditor.TagListener {
         Button button = (Button) inflater.inflate(R.layout.tag, null, false);
 
         button.setText(t.getValue());
-        addView(button, 0);
+        tagLayout.addView(button, 0);
 
         // data
         if(!tags.add(t))
