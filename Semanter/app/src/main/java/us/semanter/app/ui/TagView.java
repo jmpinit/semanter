@@ -4,11 +4,14 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import us.semanter.app.R;
@@ -20,6 +23,7 @@ public class TagView extends LinearLayout implements TagEditor.TagListener {
     private TagEditor editorView;
 
     private Set<Tag> tags;
+    private Map<Tag, Button> tagButtons;
 
     public TagView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -41,23 +45,37 @@ public class TagView extends LinearLayout implements TagEditor.TagListener {
         // Data
 
         tags = new HashSet<Tag>();
+        tagButtons = new HashMap<Tag, Button>();
     }
 
     public TagView(Context context) {
         this(context, null);
     }
 
-    private void addTag(Tag t) throws TagExistsException {
+    private void addTag(final Tag tag) throws TagExistsException {
         // ui
         LayoutInflater inflater = LayoutInflater.from(context);
         Button button = (Button) inflater.inflate(R.layout.tag, null, false);
 
-        button.setText(t.getValue());
+        button.setText(tag.getValue());
+        button.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                removeTag(tag);
+            }
+        });
+
         tagLayout.addView(button, 0);
 
         // data
-        if(!tags.add(t))
+        tagButtons.put(tag, button);
+        if(!tags.add(tag))
             throw new TagExistsException();
+    }
+
+    private synchronized void removeTag(Tag tag) {
+        tags.remove(tag);
+        tagLayout.removeView(tagButtons.get(tag));
     }
 
     public void onNewTag(Tag newTag) {
