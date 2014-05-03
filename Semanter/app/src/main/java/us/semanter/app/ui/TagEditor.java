@@ -4,9 +4,7 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.inputmethod.CompletionInfo;
 import android.widget.EditText;
-import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,10 +25,12 @@ public class TagEditor extends EditText {
     public boolean onKeyUp(int keyCode, KeyEvent event) {
         if(keyCode == KeyEvent.KEYCODE_ENTER) {
             dispatchAll(allToTags());
+            setText("");
         } else if(keyCode == KeyEvent.KEYCODE_SPACE) {
             Log.d("TagEditor", getSelectionStart() + ", " + getText().length());
             if(getSelectionStart() == getText().length() - 1) { // at end of field?
                 dispatchAll(allToTags());
+                setText("");
             }
         }
 
