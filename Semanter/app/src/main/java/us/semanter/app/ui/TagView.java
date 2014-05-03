@@ -5,12 +5,11 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
+import android.widget.Toast;
 
-import java.util.List;
-import java.util.Vector;
+import java.util.HashSet;
+import java.util.Set;
 
 import us.semanter.app.R;
 import us.semanter.app.model.Tag;
@@ -20,7 +19,7 @@ public class TagView extends LinearLayout implements TagEditor.TagListener {
     private LinearLayout tagLayout;
     private TagEditor editorView;
 
-    private List<Tag> tags;
+    private Set<Tag> tags;
 
     public TagView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -41,18 +40,14 @@ public class TagView extends LinearLayout implements TagEditor.TagListener {
 
         // Data
 
-        tags = new Vector<Tag>();
-
-        // FIXME test
-        addTag(new Tag("Test!"));
-        Log.d("TagView", "added tag");
+        tags = new HashSet<Tag>();
     }
 
     public TagView(Context context) {
         this(context, null);
     }
 
-    private void addTag(Tag t) {
+    private void addTag(Tag t) throws TagExistsException {
         // ui
         LayoutInflater inflater = LayoutInflater.from(context);
         Button button = (Button) inflater.inflate(R.layout.tag, null, false);
@@ -61,11 +56,27 @@ public class TagView extends LinearLayout implements TagEditor.TagListener {
         addView(button, 0);
 
         // data
-        tags.add(t);
+        if(!tags.add(t))
+            throw new TagExistsException();
     }
 
     public void onNewTag(Tag newTag) {
         Log.d("TagView", newTag.getValue());
-        addTag(newTag);
+
+        try {
+            addTag(newTag);
+        } catch(TagExistsException e) {
+            Toast.makeText(context, "tag already added", Toast.LENGTH_SHORT);
+        }
+    }
+
+    public Set getTags() {
+        return tags;
+    }
+
+    static class TagExistsException extends Exception {
+        public TagExistsException() {
+            super();
+        }
     }
 }
