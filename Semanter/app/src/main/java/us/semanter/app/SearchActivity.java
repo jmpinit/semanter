@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
-
 public class SearchActivity extends ActionBarActivity {
 
     @Override
@@ -13,7 +12,6 @@ public class SearchActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

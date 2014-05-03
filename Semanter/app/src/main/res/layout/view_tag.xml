@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<merge xmlns:android="http://schemas.android.com/apk/res/android" >
+    <HorizontalScrollView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/tag_selector_scroll"
+        android:layout_gravity="left"
+        android:layout_weight="7"
+        android:fillViewport="false">
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:id="@id/tag_selector_scroll_layout">
+
+        </LinearLayout>
+    </HorizontalScrollView>
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="fill_parent"
+        android:id="@+id/tag_editor_text"
+        android:editable="true"
+        android:enabled="true"
+        android:gravity="right"
+        android:hint="tag..."
+        android:maxLines="1"
+        android:singleLine="true"
+        android:layout_weight="3" />
+</merge>
