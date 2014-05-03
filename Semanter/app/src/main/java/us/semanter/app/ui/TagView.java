@@ -15,14 +15,17 @@ import java.util.Vector;
 import us.semanter.app.R;
 import us.semanter.app.model.Tag;
 
-public class TagView extends LinearLayout {
+public class TagView extends LinearLayout implements TagEditor.TagListener {
+    private Context context;
     private LinearLayout tagLayout;
-    private EditText editorView;
+    private TagEditor editorView;
 
     private List<Tag> tags;
 
     public TagView(Context context, AttributeSet attrs) {
         super(context, attrs);
+
+        this.context = context;
 
         // UI
 
@@ -33,14 +36,15 @@ public class TagView extends LinearLayout {
         inflater.inflate(R.layout.view_tag, this, true);
 
         tagLayout = (LinearLayout)findViewById(R.id.tag_selector_scroll_layout);
-        editorView = (EditText)findViewById(R.id.tag_editor_text);
+        editorView = (TagEditor)findViewById(R.id.tag_editor_text);
+        editorView.registerListener(this);
 
         // Data
 
         tags = new Vector<Tag>();
 
         // FIXME test
-        addTag(context, new Tag("Test!"));
+        addTag(new Tag("Test!"));
         Log.d("TagView", "added tag");
     }
 
@@ -48,7 +52,7 @@ public class TagView extends LinearLayout {
         this(context, null);
     }
 
-    private void addTag(Context context, Tag t) {
+    private void addTag(Tag t) {
         // ui
         LayoutInflater inflater = LayoutInflater.from(context);
         Button button = (Button) inflater.inflate(R.layout.tag, null, false);
@@ -58,5 +62,10 @@ public class TagView extends LinearLayout {
 
         // data
         tags.add(t);
+    }
+
+    public void onNewTag(Tag newTag) {
+        Log.d("TagView", newTag.getValue());
+        addTag(newTag);
     }
 }
