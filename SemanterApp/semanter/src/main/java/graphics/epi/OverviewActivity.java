@@ -38,7 +38,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.ByteBuffer;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import graphics.epi.filesystemtree.Folder;
@@ -269,7 +271,8 @@ public class OverviewActivity extends FragmentActivity
 
         // create a new note
         VisionAction processing = new OpDeskew(this, selectedImage);
-        Note newNote = new Note(imageURI.toString(), imageURI, processing);
+        String date = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+        Note newNote = new Note(imageURI.toString(), imageURI, processing, date);
 
         // make thumbnail
         newNote.thumbnail = Bitmap.createScaledBitmap(selectedImage, (int)(0.80*noteList.getWidth()), 64, false);
@@ -286,15 +289,14 @@ public class OverviewActivity extends FragmentActivity
         private String name;
         private Uri source, processed;
         private VisionAction processing;
-        private Time date;
+        private String date;
         public Bitmap thumbnail;
 
         Note(String name, Uri source, VisionAction processing, String date) {
             this.name = name;
             this.source = source;
             this.processing = processing;
-            this.date = new Time();
-            this.date.setToNow();
+            this.date = date;
         }
 
         public JSONObject toJson(){
