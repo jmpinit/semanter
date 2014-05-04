@@ -4,4 +4,5 @@
     <item name="tag_selector_scroll_layout" type="id" />
     <item name="search_tags" type="id" />
     <item name="thumbnail_note_switcher" type="id" />
+    <item name="search_note_grid" type="id" />
 </resources>
