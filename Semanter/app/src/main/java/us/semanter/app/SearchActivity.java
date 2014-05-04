@@ -25,7 +25,7 @@ public class SearchActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_search_full);
+        setContentView(R.layout.activity_search);
 
         // FIXME test
         final Tag[] testTags = new Tag[] {
@@ -38,7 +38,7 @@ public class SearchActivity extends ActionBarActivity {
         };
 
         List<Note> notes = new ArrayList<Note>();
-        for(int i=0; i < Math.random()*512; i++) {
+        for(int i=0; i < Math.random()*512 + 16; i++) {
             List<Tag> tags = new Vector<Tag>();
             for(int j=0; j < 4; j++)
                 tags.add(testTags[(int)(Math.random()*testTags.length)]);
@@ -51,7 +51,7 @@ public class SearchActivity extends ActionBarActivity {
         }
 
         noteList = (GridView)findViewById(R.id.search_note_grid);
-        noteListAdapter = new NoteListAdapter(this, R.layout.thumbnail_note_full, notes);
+        noteListAdapter = new NoteListAdapter(this, R.layout.thumbnail_note, notes);
         noteList.setAdapter(noteListAdapter);
 
         noteList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -74,9 +74,6 @@ public class SearchActivity extends ActionBarActivity {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
+        return id == R.id.action_settings || super.onOptionsItemSelected(item);
     }
 }

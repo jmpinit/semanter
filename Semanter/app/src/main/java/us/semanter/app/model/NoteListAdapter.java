@@ -7,7 +7,6 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.ViewSwitcher;
 
@@ -32,7 +31,7 @@ public class NoteListAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        RelativeLayout thumbnailView;
+        ViewGroup thumbnailView;
 
         Note note = (Note)getItem(position);
 
@@ -40,7 +39,7 @@ public class NoteListAdapter extends BaseAdapter {
             // create
             LayoutInflater inflater;
             inflater = LayoutInflater.from(mContext);
-            thumbnailView = (RelativeLayout)inflater.inflate(resource, null);
+            thumbnailView = (ViewGroup)inflater.inflate(resource, null);
 
             // adjust for GridView
             thumbnailView.setLayoutParams(new GridView.LayoutParams(85, 85));
@@ -72,7 +71,7 @@ public class NoteListAdapter extends BaseAdapter {
                     break;
             }
         } else {
-            thumbnailView = (RelativeLayout) convertView;
+            thumbnailView = (ViewGroup) convertView;
         }
 
         return thumbnailView;
