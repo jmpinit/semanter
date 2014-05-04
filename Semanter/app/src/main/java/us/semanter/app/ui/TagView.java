@@ -83,7 +83,7 @@ public class TagView extends LinearLayout implements TagEditor.TagListener {
         try {
             addTag(newTag);
         } catch(TagExistsException e) {
-            Toast.makeText(context, "tag already added", Toast.LENGTH_SHORT);
+            Toast.makeText(context, "tag already added", Toast.LENGTH_SHORT).show();
         }
     }
 
