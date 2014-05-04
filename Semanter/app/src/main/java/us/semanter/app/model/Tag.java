@@ -13,4 +13,10 @@ public class Tag {
     public int hashCode() {
         return value.hashCode();
     }
+
+    @Override
+    public boolean equals(Object other) {
+        if(!(other instanceof Tag)) return false;
+        return value.equals(((Tag) other).value);
+    }
 }
