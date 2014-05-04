@@ -1,16 +1,64 @@
 package us.semanter.app;
 
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.GridView;
+import android.widget.Toast;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Vector;
+
+import us.semanter.app.model.Note;
+import us.semanter.app.model.NoteListAdapter;
+import us.semanter.app.model.Tag;
 
 public class SearchActivity extends ActionBarActivity {
+    private GridView noteList;
+    private NoteListAdapter noteListAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_search);
+        setContentView(R.layout.activity_search_full);
+
+        // FIXME test
+        final Tag[] testTags = new Tag[] {
+                new Tag("geometry"),
+                new Tag("project"),
+                new Tag("receipt"),
+                new Tag("whiteboard"),
+                new Tag("printed"),
+                new Tag("blog")
+        };
+
+        List<Note> notes = new ArrayList<Note>();
+        for(int i=0; i < Math.random()*512; i++) {
+            List<Tag> tags = new Vector<Tag>();
+            for(int j=0; j < 4; j++)
+                tags.add(testTags[(int)(Math.random()*testTags.length)]);
+
+            Note newNote = new Note(new Date(), tags);
+            for(int j=0; j < Math.random()*3; j++)
+                newNote = newNote.nextTask();
+
+            notes.add(newNote);
+        }
+
+        noteList = (GridView)findViewById(R.id.search_note_grid);
+        noteListAdapter = new NoteListAdapter(this, R.layout.thumbnail_note_full, notes);
+        noteList.setAdapter(noteListAdapter);
+
+        noteList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
+                Toast.makeText(SearchActivity.this, "" + position, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     @Override

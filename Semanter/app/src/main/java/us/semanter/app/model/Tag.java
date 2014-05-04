@@ -1,5 +1,8 @@
 package us.semanter.app.model;
 
+/**
+ * Immutable
+ */
 public class Tag {
     private String value;
 

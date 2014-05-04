@@ -1,11 +1,7 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    tools:context="us.semanter.app.SearchActivity">
-
-    <us.semanter.app.ui.TagView
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content" />
-</LinearLayout>
+<GridView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:id="@+id/search_note_grid"
+    android:choiceMode="singleChoice"
+    android:numColumns="3"
+    android:stretchMode="spacingWidth" />
