@@ -36,7 +36,7 @@ public class TagView extends LinearLayout implements TagEditor.TagListener {
 
         LayoutInflater inflater = (LayoutInflater) context
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        inflater.inflate(R.layout.view_tag, this, true);
+        addView(inflater.inflate(R.layout.view_tag, this, false));
 
         tagLayout = (LinearLayout)findViewById(R.id.tag_selector_scroll_layout);
         editorView = (TagEditor)findViewById(R.id.tag_editor_text);
@@ -53,24 +53,23 @@ public class TagView extends LinearLayout implements TagEditor.TagListener {
     }
 
     private void addTag(final Tag tag) throws TagExistsException {
-        // ui
-        LayoutInflater inflater = LayoutInflater.from(context);
-        Button button = (Button) inflater.inflate(R.layout.tag, null, false);
+        if(tags.add(tag)) {
+            LayoutInflater inflater = LayoutInflater.from(context);
+            Button button = (Button) inflater.inflate(R.layout.tag, null, false);
 
-        button.setText(tag.getValue());
-        button.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                removeTag(tag);
-            }
-        });
+            button.setText(tag.getValue());
+            button.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    removeTag(tag);
+                }
+            });
 
-        tagLayout.addView(button, 0);
-
-        // data
-        tagButtons.put(tag, button);
-        if(!tags.add(tag))
+            tagLayout.addView(button, 0);
+            tagButtons.put(tag, button);
+        } else {
             throw new TagExistsException();
+        }
     }
 
     private synchronized void removeTag(Tag tag) {

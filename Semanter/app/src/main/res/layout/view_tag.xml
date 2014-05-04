@@ -1,13 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<merge xmlns:android="http://schemas.android.com/apk/res/android" >
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
+
+    <us.semanter.app.ui.TagEditor
+        android:layout_width="wrap_content"
+        android:layout_height="fill_parent"
+        android:id="@+id/tag_editor_text"
+        android:gravity="left"
+        android:hint="tag..."
+        android:singleLine="true"
+        android:layout_weight="3"/>
+
+    <Button android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="add" />
+
     <HorizontalScrollView
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="fill_parent"
         android:id="@+id/tag_selector_scroll"
         android:layout_gravity="left"
         android:layout_weight="7"
-        android:fillViewport="false">
+        android:fillViewport="false"
+        android:background="#32ff8200">
 
         <LinearLayout
             android:orientation="horizontal"
@@ -17,27 +35,4 @@
 
         </LinearLayout>
     </HorizontalScrollView>
-
-    <View
-        android:layout_width="fill_parent"
-        android:layout_height="1dp"
-        android:background="@android:color/darker_gray"/>
-
-    <us.semanter.app.ui.TagEditor
-        android:layout_width="wrap_content"
-        android:layout_height="fill_parent"
-        android:id="@+id/tag_editor_text"
-        android:editable="true"
-        android:enabled="true"
-        android:gravity="right"
-        android:hint="tag..."
-        android:maxLines="1"
-        android:singleLine="true"
-        android:layout_weight="3"
-        android:minLines="1"
-        android:lines="1" />
-
-    <Button android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="add" />
-</merge>
+</LinearLayout>
