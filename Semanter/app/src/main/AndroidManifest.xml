@@ -16,6 +16,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name="us.semanter.app.ReviewActivity"
+            android:label="@string/title_activity_review"
+            android:parentActivityName="us.semanter.app.SearchActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="SearchActivity" />
+        </activity>
     </application>
 
 </manifest>

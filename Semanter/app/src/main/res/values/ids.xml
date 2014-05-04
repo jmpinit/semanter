@@ -5,4 +5,5 @@
     <item name="search_tags" type="id" />
     <item name="thumbnail_note_switcher" type="id" />
     <item name="search_note_grid" type="id" />
+    <item name="review_vision_view" type="id" />
 </resources>

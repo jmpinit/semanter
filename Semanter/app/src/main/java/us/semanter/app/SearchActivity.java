@@ -1,5 +1,6 @@
 package us.semanter.app;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
@@ -7,7 +8,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -44,7 +44,7 @@ public class SearchActivity extends ActionBarActivity {
                 tags.add(testTags[(int)(Math.random()*testTags.length)]);
 
             Note newNote = new Note(new Date(), tags);
-            for(int j=0; j < Math.random()*3; j++)
+            for(int j=0; j < (int)(Math.random()*4); j++)
                 newNote = newNote.nextTask();
 
             notes.add(newNote);
@@ -54,9 +54,11 @@ public class SearchActivity extends ActionBarActivity {
         noteListAdapter = new NoteListAdapter(this, R.layout.thumbnail_note, notes);
         noteList.setAdapter(noteListAdapter);
 
+        final Intent reviewIntent = new Intent(this, ReviewActivity.class);
         noteList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-                Toast.makeText(SearchActivity.this, "" + position, Toast.LENGTH_SHORT).show();
+                reviewIntent.putExtra(getString(R.string.param_note), (Note)noteListAdapter.getItem(position));
+                startActivity(reviewIntent);
             }
         });
     }
