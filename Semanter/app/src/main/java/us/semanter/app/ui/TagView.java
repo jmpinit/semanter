@@ -2,7 +2,6 @@ package us.semanter.app.ui;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -78,8 +77,6 @@ public class TagView extends LinearLayout implements TagEditor.TagListener {
     }
 
     public void onNewTag(Tag newTag) {
-        Log.d("TagView", newTag.getValue());
-
         try {
             addTag(newTag);
         } catch(TagExistsException e) {

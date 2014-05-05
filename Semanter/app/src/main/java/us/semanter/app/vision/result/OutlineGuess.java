@@ -47,7 +47,7 @@ public class OutlineGuess implements JSONable {
 
     @Override
     public boolean equals(Object other) {
-        if(!(other instanceof FlattenerResult)) return false;
+        if(!(other instanceof OutlineGuess)) return false;
 
         OutlineGuess otherOutlineGuess = (OutlineGuess)other;
 

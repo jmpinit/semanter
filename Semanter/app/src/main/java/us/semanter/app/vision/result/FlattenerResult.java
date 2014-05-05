@@ -79,10 +79,10 @@ public class FlattenerResult implements VisionResult, JSONable {
 
     @Override
     public boolean equals(Object other) {
-        if((other instanceof FlattenerResult)) return false;
+        if(!(other instanceof FlattenerResult)) return false;
 
         FlattenerResult otherFlattenerResult = (FlattenerResult)other;
-        if(!prior.equals(otherFlattenerResult.prior)) return false;
+        if(!prior.getPath().equals(otherFlattenerResult.prior.getPath())) return false;
         if(!outlines.equals(otherFlattenerResult.outlines)) return false;
 
         return true;
