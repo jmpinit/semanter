@@ -19,22 +19,32 @@ import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import us.semanter.app.model.Note;
 import us.semanter.app.model.NoteListAdapter;
+import us.semanter.app.vision.task.Flattener;
+import us.semanter.app.vision.task.TaskListener;
+import us.semanter.app.vision.util.VisionResult;
 
-public class SearchActivity extends ActionBarActivity {
+public class SearchActivity extends ActionBarActivity implements TaskListener {
     private GridView noteList;
     private NoteListAdapter noteListAdapter;
     private Intent reviewIntent;
+
+    private List<Note> notes;
+    private Map<Runnable, Note> taskMap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
 
-        List<Note> notes = new ArrayList<Note>();
+        notes = new ArrayList<Note>();
+        taskMap = new HashMap<Runnable, Note>();
 
         noteList = (GridView)findViewById(R.id.search_note_grid);
         noteListAdapter = new NoteListAdapter(this, R.layout.thumbnail_note, notes);
@@ -45,6 +55,20 @@ public class SearchActivity extends ActionBarActivity {
             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
                 reviewIntent.putExtra(getString(R.string.param_note), (Note)noteListAdapter.getItem(position));
                 startActivity(reviewIntent);
+            }
+        });
+    }
+
+    @Override
+    public void onTaskCompleted(final Runnable task, final VisionResult result) {
+        runOnUiThread(new Runnable() {
+            public void run() {
+                Note note = taskMap.get(task);
+                taskMap.remove(task);
+
+                notes.remove(note);
+                notes.add(note.progress(result));
+                noteListAdapter.notifyDataSetChanged();
             }
         });
     }
@@ -76,10 +100,18 @@ public class SearchActivity extends ActionBarActivity {
         String filePath = cursor.getString(columnIndex);
         cursor.close();
 
-        // FIXME test
-        reviewIntent.putExtra("hack", filePath);
-        startActivity(reviewIntent);
-        // FIXME ==end==
+        // TODO use EXIF for date
+        Note newNote = new Note(new Date());
+
+        Flattener flattener = new Flattener(Uri.parse(filePath));
+        flattener.registerListener(this);
+
+        taskMap.put(flattener, newNote);
+        notes.add(newNote);
+        noteListAdapter.notifyDataSetChanged();
+
+        // start processing
+        (new Thread(flattener)).start();
     }
 
     @Override

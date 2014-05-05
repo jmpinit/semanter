@@ -21,6 +21,7 @@ import org.opencv.imgproc.Imgproc;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Vector;
 
 import us.semanter.app.vision.result.FlattenerResult;
 import us.semanter.app.vision.result.GuessFactory;
@@ -52,12 +53,24 @@ public class Flattener implements Runnable {
     private Bitmap priorImage;
     private FlattenerResult result;
 
+    private List<TaskListener> listeners;
     private boolean finished;
 
     public Flattener(Uri prior) {
         this.prior = prior;
         priorImage = BitmapFactory.decodeFile(prior.getPath());
+        listeners = new Vector<TaskListener>();
         finished = false;
+    }
+
+    public void registerListener(TaskListener listener) {
+        listeners.add(listener);
+    }
+
+    private void dispatch(FlattenerResult result) {
+        for(TaskListener listener: listeners) {
+            listener.onTaskCompleted(this, result);
+        }
     }
 
     public void run() {
@@ -107,7 +120,8 @@ public class Flattener implements Runnable {
 
         this.result = new FlattenerResult(prior, GuessFactory.outlineGuess(squares));
         finished = true;
-        Log.d("Flattener", "finished");
+
+        dispatch(result);
     }
 
     private List<Polygon> findSquares(Bitmap source) {

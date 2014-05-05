@@ -17,7 +17,7 @@ import us.semanter.app.vision.util.VisionResult;
 public class Note implements Parcelable {
     private final Date date;
     private final Set<Tag> tags;
-    private final Bundle results;
+    private Bundle results;
     private int progress;
 
     public Note(Date date, Set<Tag> tags) {
@@ -32,6 +32,10 @@ public class Note implements Parcelable {
         this.tags = new HashSet<Tag>(tags);
         this.results = new Bundle();
         this.progress = 0;
+    }
+
+    public Note(Date date) {
+        this(date, new HashSet<Tag>());
     }
 
     /**
@@ -53,7 +57,8 @@ public class Note implements Parcelable {
 
     public Note progress(VisionResult result) {
         Note newNote = new Note(this.date, this.tags);
-        newNote.progress = progress++;
+        newNote.progress = progress + 1;
+        newNote.results = results;
         newNote.results.putParcelable(result.getTaskName(), result);
         return newNote;
     }
@@ -68,6 +73,11 @@ public class Note implements Parcelable {
 
     public int getProgress() {
         return progress;
+    }
+
+    public VisionResult getResult(ClassLoader loader, String name) {
+        results.setClassLoader(loader);
+        return results.getParcelable(name);
     }
 
     /*

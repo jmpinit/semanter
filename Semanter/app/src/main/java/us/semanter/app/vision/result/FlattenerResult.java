@@ -18,7 +18,7 @@ import us.semanter.app.vision.util.VisionResult;
  * Immutable results of flattening
  */
 public class FlattenerResult implements VisionResult, JSONable {
-    private static final String TASK_NAME = "Flatten";
+    public static final String TASK_NAME = "flatten";
     private static final String KEY_PRIOR = "prior";
     private static final String KEY_OUTLINES = "outlines";
 
@@ -133,7 +133,7 @@ public class FlattenerResult implements VisionResult, JSONable {
         return 0;
     }
 
-    public final Parcelable.Creator<FlattenerResult> CREATOR = new Parcelable.Creator<FlattenerResult>() {
+    public static final Parcelable.Creator<FlattenerResult> CREATOR = new Parcelable.Creator<FlattenerResult>() {
         public FlattenerResult createFromParcel(Parcel in) {
             return new FlattenerResult(in);
         }

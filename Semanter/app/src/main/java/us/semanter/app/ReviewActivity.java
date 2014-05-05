@@ -1,7 +1,6 @@
 package us.semanter.app;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
@@ -9,7 +8,7 @@ import android.view.MenuItem;
 
 import us.semanter.app.model.Note;
 import us.semanter.app.ui.review.FlattenerView;
-import us.semanter.app.vision.task.Flattener;
+import us.semanter.app.vision.result.FlattenerResult;
 
 public class ReviewActivity extends ActionBarActivity {
     private Note noteToReview;
@@ -24,18 +23,7 @@ public class ReviewActivity extends ActionBarActivity {
         noteToReview = intent.getParcelableExtra(getString(R.string.param_note));
 
         flattenerView = (FlattenerView)findViewById(R.id.review_vision_view);
-
-        Uri uri = Uri.parse(intent.getStringExtra("hack"));
-        Flattener flattener = new Flattener(uri);
-        flattener.run();
-
-        flattenerView.review(flattener.getResult());
-
-        /*if(noteToReview != null) {
-            // TODO
-        } else {
-            finish();
-        }*/
+        flattenerView.review((FlattenerResult)noteToReview.getResult(getClassLoader(), FlattenerResult.TASK_NAME));
     }
 
     @Override
