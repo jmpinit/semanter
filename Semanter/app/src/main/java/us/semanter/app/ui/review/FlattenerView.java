@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.AttributeSet;
 
@@ -14,9 +15,6 @@ import us.semanter.app.vision.Flattener;
 import us.semanter.app.vision.util.Polygon;
 
 public class FlattenerView extends VisionView {
-    private static final Paint linePaint = new Paint();
-    { linePaint.setARGB(255, 255, 0, 0); }
-
     private Flattener.Result result;
     private Bitmap prior;
 
@@ -31,7 +29,8 @@ public class FlattenerView extends VisionView {
 
     @Override
     protected void render(Canvas canvas) {
-        Paint p = new Paint(linePaint);
+        Paint p = new Paint();
+        p.setColor(Color.MAGENTA);
         p.setStrokeWidth(4);
 
         canvas.drawBitmap(prior, 0, 0, p);
@@ -42,10 +41,10 @@ public class FlattenerView extends VisionView {
                 p.setAlpha((int)(128 + result.getConfidence(poly) * 128));
 
                 Point[] points = poly.getPoints();
-                Point last = points[0];
-                for(Point pt: points) {
-                    canvas.drawLine((float)last.x, (float)last.y, (float)pt.x, (float)pt.y, p);
-                    last = pt;
+                for(int i=0; i < points.length + 1; i++) {
+                    Point first = points[i];
+                    Point second = points[(i+1)%points.length];
+                    canvas.drawLine((float)first.x, (float)first.y, (float)second.x, (float)second.y, p);
                 }
             } catch(Exception e) {
                 e.printStackTrace();
