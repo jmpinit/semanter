@@ -10,6 +10,8 @@ import android.util.AttributeSet;
 
 import org.opencv.core.Point;
 
+import java.util.List;
+
 import us.semanter.app.ui.VisionView;
 import us.semanter.app.vision.Flattener;
 import us.semanter.app.vision.util.Polygon;
@@ -40,10 +42,10 @@ public class FlattenerView extends VisionView {
             try {
                 p.setAlpha((int)(128 + result.getConfidence(poly) * 128));
 
-                Point[] points = poly.getPoints();
-                for(int i=0; i < points.length + 1; i++) {
-                    Point first = points[i];
-                    Point second = points[(i+1)%points.length];
+                List<Point> points = poly.getPoints();
+                for(int i=0; i < points.size() + 1; i++) {
+                    Point first = points.get(i);
+                    Point second = points.get((i+1)%points.size());
                     canvas.drawLine((float)first.x, (float)first.y, (float)second.x, (float)second.y, p);
                 }
             } catch(Exception e) {

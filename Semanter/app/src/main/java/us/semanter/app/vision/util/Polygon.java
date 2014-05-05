@@ -5,28 +5,34 @@ import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
 import org.opencv.imgproc.Imgproc;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
  * Immutable
  */
 public class Polygon {
-    private Point[] points;
+    private List<Point> points;
 
     public Polygon(Point[] points) {
-        this.points = points;
+        this.points = new ArrayList(Arrays.asList(points));
     }
 
-    public Point[] getPoints() {
+    public Polygon(List<Point> points) {
+        this.points = new ArrayList<Point>(points);
+    }
+
+    public List<Point> getPoints() {
         return points;
     }
 
     public MatOfPoint toMatOfPoint() {
-        return new MatOfPoint(points); // FIXME don't leak rep
+        return new MatOfPoint(points.toArray(new Point[0])); // FIXME don't leak rep
     }
 
     public MatOfPoint2f toMatOfPoint2f() {
-        return new MatOfPoint2f(points); // FIXME don't leak rep
+        return new MatOfPoint2f(points.toArray(new Point[0])); // FIXME don't leak rep
     }
 
     public static Polygon largest(List<Polygon> polygons) {
