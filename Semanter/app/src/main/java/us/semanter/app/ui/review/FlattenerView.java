@@ -43,7 +43,7 @@ public class FlattenerView extends VisionView {
                 p.setAlpha((int)(128 + result.getConfidence(poly) * 128));
 
                 List<Point> points = poly.getPoints();
-                for(int i=0; i < points.size() + 1; i++) {
+                for(int i=0; i < points.size(); i++) {
                     Point first = points.get(i);
                     Point second = points.get((i+1)%points.size());
                     canvas.drawLine((float)first.x, (float)first.y, (float)second.x, (float)second.y, p);
