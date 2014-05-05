@@ -70,9 +70,21 @@ public class NoteListAdapter extends BaseAdapter {
                 break;
         }
 
-        //thumbnailView.setClickable(note.getProgress() > 0);
-
         return thumbnailView;
+    }
+
+    @Override
+    public boolean  areAllItemsEnabled() {
+        return false;
+    }
+
+    @Override
+    public boolean isEnabled(int position) {
+        if(position < notes.size()) {
+            return notes.get(position).getProgress() > 0;
+        } else {
+            return false;
+        }
     }
 
     @Override
