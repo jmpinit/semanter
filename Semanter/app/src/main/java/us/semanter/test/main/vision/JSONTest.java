@@ -19,7 +19,9 @@ import us.semanter.app.vision.util.Polygon;
  * Test the JSON conversion of JSONable objects
  */
 public class JSONTest extends AndroidTestCase {
-    public void flattenResultJSONTest() {
+    private final static int NUM_ITEMS = 32;
+
+    public void testFlattenResultJSON() {
         Uri testUri = Uri.parse("/test/some/file/path");
         List<OutlineGuess> testOutlines = randomOutlines();
 
@@ -35,7 +37,7 @@ public class JSONTest extends AndroidTestCase {
         }
     }
 
-    public void outlineGuessTest() {
+    public void testOutlineGuess() {
         OutlineGuess guess = new OutlineGuess(randomPolygon(), (float)Math.random());
 
         String json = "";
@@ -48,7 +50,7 @@ public class JSONTest extends AndroidTestCase {
         }
     }
 
-    public void polygonJSONTest() {
+    public void testPolygonJSON() {
 
     }
 
@@ -62,7 +64,7 @@ public class JSONTest extends AndroidTestCase {
 
     private List<OutlineGuess> randomOutlines() {
         Random generator = new Random();
-        int length = generator.nextInt();
+        int length = generator.nextInt(NUM_ITEMS);
 
         List<OutlineGuess> outlines = new ArrayList<OutlineGuess>();
         for(int i = 0; i < length; i++) {
@@ -74,7 +76,7 @@ public class JSONTest extends AndroidTestCase {
 
     private List<Polygon> randomPolygons() {
         Random generator = new Random();
-        int length = generator.nextInt();
+        int length = generator.nextInt(NUM_ITEMS);
 
         List<Polygon> polygons = new ArrayList<Polygon>();
         for(int i = 0; i < length; i++) {
@@ -86,7 +88,7 @@ public class JSONTest extends AndroidTestCase {
 
     private List<Point> randomPoints() {
         Random generator = new Random();
-        int length = generator.nextInt();
+        int length = generator.nextInt(NUM_ITEMS);
 
         List<Point> points = new ArrayList<Point>();
         for(int i = 0; i < length; i++) {
