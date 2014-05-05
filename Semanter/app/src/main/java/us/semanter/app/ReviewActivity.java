@@ -1,18 +1,19 @@
 package us.semanter.app;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import us.semanter.app.model.Note;
-import us.semanter.app.ui.VisionView;
-
+import us.semanter.app.ui.review.FlattenerView;
+import us.semanter.app.vision.Flattener;
 
 public class ReviewActivity extends ActionBarActivity {
     private Note noteToReview;
-    private VisionView visionView;
+    private FlattenerView flattenerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,13 +23,19 @@ public class ReviewActivity extends ActionBarActivity {
         Intent intent = getIntent();
         noteToReview = intent.getParcelableExtra(getString(R.string.param_note));
 
-        visionView = (VisionView)findViewById(R.id.review_vision_view);
+        flattenerView = (FlattenerView)findViewById(R.id.review_vision_view);
 
-        if(noteToReview != null) {
-            visionView.open(noteToReview);
+        Uri uri = Uri.parse(intent.getStringExtra("hack"));
+        Flattener flattener = new Flattener(uri);
+        flattener.run();
+
+        flattenerView.review(flattener.getResult());
+
+        /*if(noteToReview != null) {
+            // TODO
         } else {
             finish();
-        }
+        }*/
     }
 
     @Override

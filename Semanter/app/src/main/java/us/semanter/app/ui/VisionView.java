@@ -1,26 +1,17 @@
 package us.semanter.app.ui;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
-import us.semanter.app.R;
-import us.semanter.app.model.Note;
-
-public class VisionView extends SurfaceView implements SurfaceHolder.Callback {
-    private Context mContext;
+public abstract class VisionView extends SurfaceView implements SurfaceHolder.Callback {
+    protected Context mContext;
     private VisionViewUpdater updater;
     private Thread updaterThread;
-
-    private Bitmap noteBitmap;
 
     public VisionView(Context ctx, AttributeSet attrSet) {
         super(ctx, attrSet);
@@ -33,39 +24,7 @@ public class VisionView extends SurfaceView implements SurfaceHolder.Callback {
         setFocusable(true);
     }
 
-    public void render(Canvas canvas) {
-        Paint paint = new Paint();
-
-        if(noteBitmap != null) {
-            canvas.drawColor(Color.BLACK);
-            canvas.drawBitmap(noteBitmap, 0, 0, paint);
-        } else {
-            canvas.drawColor(Color.RED);
-        }
-    }
-
-    public void open(Note note) {
-        // TODO load composite note image
-
-        // FIXME test
-        switch(note.getProgress()) {
-            case 0:
-                noteBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_progress_1);
-                break;
-            case 1:
-                noteBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_progress_2);
-                break;
-            case 2:
-                noteBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_progress_3);
-                break;
-            case 3:
-                noteBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_progress_4);
-                break;
-            case 4:
-                noteBitmap = null;
-                break;
-        }
-    }
+    abstract protected void render(Canvas canvas);
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {

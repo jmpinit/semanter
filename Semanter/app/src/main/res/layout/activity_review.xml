@@ -4,7 +4,7 @@
     android:layout_height="fill_parent"
     tools:context="us.semanter.app.ReviewActivity">
 
-    <us.semanter.app.ui.VisionView
+    <us.semanter.app.ui.review.FlattenerView
         android:text="@string/hello_world"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
