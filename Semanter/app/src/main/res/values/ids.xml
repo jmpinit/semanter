@@ -6,4 +6,7 @@
     <item name="thumbnail_note_switcher" type="id" />
     <item name="search_note_grid" type="id" />
     <item name="review_vision_view" type="id" />
+    <item name="activity_tag_sorter" type="id" />
+    <item name="activity_tag_tags" type="id" />
+    <item name="activity_tag_notes" type="id" />
 </resources>

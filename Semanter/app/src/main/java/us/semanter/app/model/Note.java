@@ -18,20 +18,20 @@ public class Note implements Parcelable {
     private final Date date;
     private final Set<Tag> tags;
     private Bundle results;
-    private int progress;
+    private int resultCount;
 
     public Note(Date date, Set<Tag> tags) {
         this.date = new Date(date.getTime());
         this.tags = new HashSet<Tag>(tags);
         this.results = new Bundle();
-        this.progress = 0;
+        this.resultCount = 0;
     }
 
     public Note(Date date, List<Tag> tags) {
         this.date = new Date(date.getTime());
         this.tags = new HashSet<Tag>(tags);
         this.results = new Bundle();
-        this.progress = 0;
+        this.resultCount = 0;
     }
 
     public Note(Date date) {
@@ -43,7 +43,7 @@ public class Note implements Parcelable {
      */
     private Note(Parcel in) {
         date = new Date(in.readLong());
-        progress = in.readInt();
+        resultCount = in.readInt();
 
         String[] tagNames = new String[in.readInt()];
         in.readStringArray(tagNames);
@@ -55,12 +55,16 @@ public class Note implements Parcelable {
         results = in.readBundle();
     }
 
-    public Note progress(VisionResult result) {
+    public Note addResult(VisionResult result) {
         Note newNote = new Note(this.date, this.tags);
-        newNote.progress = progress + 1;
         newNote.results = results;
         newNote.results.putParcelable(result.getTaskName(), result);
+        newNote.resultCount = resultCount + 1;
         return newNote;
+    }
+
+    public int getResultCount() {
+        return resultCount;
     }
 
     public Date getDate() {
@@ -69,10 +73,6 @@ public class Note implements Parcelable {
 
     public Set<Tag> getTags() {
         return new HashSet<Tag>(tags);
-    }
-
-    public int getProgress() {
-        return progress;
     }
 
     public VisionResult getResult(ClassLoader loader, String name) {
@@ -84,7 +84,7 @@ public class Note implements Parcelable {
     Parcelable
     format:
     1) (long) Unix time stamp
-    2) (int) progress
+    2) (int) addResult
     3) (int) number of tags
     4..n) (String) tag
     n..) (Bundle) result
@@ -93,7 +93,7 @@ public class Note implements Parcelable {
     @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeLong(date.getTime());
-        out.writeInt(progress);
+        out.writeInt(resultCount);
 
         out.writeInt(tags.size());
         String[] tagNames = new String[tags.size()];

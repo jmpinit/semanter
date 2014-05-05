@@ -26,6 +26,7 @@ import java.util.Map;
 
 import us.semanter.app.model.Note;
 import us.semanter.app.model.NoteListAdapter;
+import us.semanter.app.vision.VisionPipeline;
 import us.semanter.app.vision.task.Flattener;
 import us.semanter.app.vision.task.TaskListener;
 import us.semanter.app.vision.util.VisionResult;
@@ -33,7 +34,6 @@ import us.semanter.app.vision.util.VisionResult;
 public class SearchActivity extends ActionBarActivity implements TaskListener {
     private GridView noteList;
     private NoteListAdapter noteListAdapter;
-    private Intent reviewIntent;
 
     private List<Note> notes;
     private Map<Runnable, Note> taskMap;
@@ -50,10 +50,11 @@ public class SearchActivity extends ActionBarActivity implements TaskListener {
         noteListAdapter = new NoteListAdapter(this, R.layout.thumbnail_note, notes);
         noteList.setAdapter(noteListAdapter);
 
-        reviewIntent = new Intent(this, ReviewActivity.class);
+        final Intent reviewIntent = new Intent(this, ReviewActivity.class);
         noteList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
                 reviewIntent.putExtra(getString(R.string.param_note), (Note)noteListAdapter.getItem(position));
+                reviewIntent.putExtra("task", VisionPipeline.Task.FLATTEN.getName());
                 startActivity(reviewIntent);
             }
         });
@@ -67,7 +68,7 @@ public class SearchActivity extends ActionBarActivity implements TaskListener {
                 taskMap.remove(task);
 
                 notes.remove(note);
-                notes.add(note.progress(result));
+                notes.add(note.addResult(result));
                 noteListAdapter.notifyDataSetChanged();
             }
         });
@@ -127,6 +128,11 @@ public class SearchActivity extends ActionBarActivity implements TaskListener {
         switch(item.getItemId()) {
             case R.id.action_import:
                 importPhoto();
+                break;
+            case R.id.action_tag:
+                Intent tagIntent = new Intent(this, TagActivity.class);
+                tagIntent.putExtra("notes", notes.toArray());
+                startActivity(tagIntent);
                 break;
         }
 

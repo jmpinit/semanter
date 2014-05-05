@@ -7,5 +7,7 @@
     <string name="title_activity_review">ReviewActivity</string>
     <string name="param_note">note</string>
     <string name="action_import">import</string>
+    <string name="action_tag">action_tag</string>
+    <string name="title_activity_tag">TagActivity</string>
 
 </resources>

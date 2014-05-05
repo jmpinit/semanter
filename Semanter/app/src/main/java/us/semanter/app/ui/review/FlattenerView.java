@@ -15,6 +15,7 @@ import java.util.List;
 import us.semanter.app.ui.VisionView;
 import us.semanter.app.vision.result.FlattenerResult;
 import us.semanter.app.vision.result.OutlineGuess;
+import us.semanter.app.vision.util.VisionResult;
 
 public class FlattenerView extends VisionView {
     private FlattenerResult result;
@@ -24,8 +25,9 @@ public class FlattenerView extends VisionView {
         super(ctx, attrSet);
     }
 
-    public void review(FlattenerResult result) {
-        this.result = result;
+    @Override
+    public void review(VisionResult result) {
+        this.result = (FlattenerResult)result;
         prior = BitmapFactory.decodeFile(result.getPrior().getPath());
     }
 

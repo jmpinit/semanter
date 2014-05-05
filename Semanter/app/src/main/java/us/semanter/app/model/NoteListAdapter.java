@@ -52,7 +52,7 @@ public class NoteListAdapter extends BaseAdapter {
 
         // TODO task numbers as enum
         ImageView progressImage = (ImageView)thumbnailView.findViewById(R.id.thumbnail_note_progress);
-        switch(note.getProgress()) {
+        switch(note.getResultCount()) {
             case 0:
                 progressImage.setImageResource(R.drawable.ic_progress_1);
                 break;
@@ -81,7 +81,7 @@ public class NoteListAdapter extends BaseAdapter {
     @Override
     public boolean isEnabled(int position) {
         if(position < notes.size()) {
-            return notes.get(position).getProgress() > 0;
+            return notes.get(position).getResultCount() > 0;
         } else {
             return false;
         }

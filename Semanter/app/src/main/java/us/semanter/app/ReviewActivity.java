@@ -7,23 +7,23 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import us.semanter.app.model.Note;
-import us.semanter.app.ui.review.FlattenerView;
-import us.semanter.app.vision.result.FlattenerResult;
+import us.semanter.app.ui.VisionView;
 
 public class ReviewActivity extends ActionBarActivity {
     private Note noteToReview;
-    private FlattenerView flattenerView;
+    private VisionView visionView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_review);
 
         Intent intent = getIntent();
         noteToReview = intent.getParcelableExtra(getString(R.string.param_note));
 
-        flattenerView = (FlattenerView)findViewById(R.id.review_vision_view);
-        flattenerView.review((FlattenerResult)noteToReview.getResult(getClassLoader(), FlattenerResult.TASK_NAME));
+        String taskName = intent.getStringExtra("task");
+        // TODO instantiate visionView from layout file according to taskName
+
+        setContentView(visionView);
     }
 
     @Override

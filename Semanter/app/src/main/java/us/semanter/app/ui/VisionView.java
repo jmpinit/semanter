@@ -8,6 +8,8 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
+import us.semanter.app.vision.util.VisionResult;
+
 public abstract class VisionView extends SurfaceView implements SurfaceHolder.Callback {
     protected Context mContext;
     private VisionViewUpdater updater;
@@ -23,6 +25,8 @@ public abstract class VisionView extends SurfaceView implements SurfaceHolder.Ca
 
         setFocusable(true);
     }
+
+    abstract public void review(VisionResult result);
 
     abstract protected void render(Canvas canvas);
 
