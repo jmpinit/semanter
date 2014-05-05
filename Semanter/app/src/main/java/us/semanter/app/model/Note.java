@@ -1,5 +1,6 @@
 package us.semanter.app.model;
 
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -8,23 +9,28 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import us.semanter.app.vision.util.VisionResult;
+
 /**
  * Immutable in-memory representation of note
  */
 public class Note implements Parcelable {
     private final Date date;
     private final Set<Tag> tags;
+    private final Bundle results;
     private int progress;
 
     public Note(Date date, Set<Tag> tags) {
         this.date = new Date(date.getTime());
         this.tags = new HashSet<Tag>(tags);
+        this.results = new Bundle();
         this.progress = 0;
     }
 
     public Note(Date date, List<Tag> tags) {
         this.date = new Date(date.getTime());
         this.tags = new HashSet<Tag>(tags);
+        this.results = new Bundle();
         this.progress = 0;
     }
 
@@ -41,11 +47,14 @@ public class Note implements Parcelable {
         tags = new HashSet<Tag>();
         for(String tagName: tagNames)
             tags.add(new Tag(tagName));
+
+        results = in.readBundle();
     }
 
-    public Note nextTask() {
+    public Note progress(VisionResult result) {
         Note newNote = new Note(this.date, this.tags);
-        newNote.progress = progress + 1;
+        newNote.progress = progress++;
+        newNote.results.putParcelable(result.getTaskName(), result);
         return newNote;
     }
 
@@ -67,7 +76,8 @@ public class Note implements Parcelable {
     1) (long) Unix time stamp
     2) (int) progress
     3) (int) number of tags
-    4..n) (
+    4..n) (String) tag
+    n..) (Bundle) result
      */
 
     @Override
@@ -80,6 +90,8 @@ public class Note implements Parcelable {
         { int i = 0; for(Tag t: tags)
             tagNames[i++] = t.getValue(); }
         out.writeStringArray(tagNames);
+
+        out.writeBundle(results);
     }
 
     @Override

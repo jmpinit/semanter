@@ -9,7 +9,7 @@ import android.view.MenuItem;
 
 import us.semanter.app.model.Note;
 import us.semanter.app.ui.review.FlattenerView;
-import us.semanter.app.vision.Flattener;
+import us.semanter.app.vision.task.Flattener;
 
 public class ReviewActivity extends ActionBarActivity {
     private Note noteToReview;

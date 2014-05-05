@@ -1,4 +1,4 @@
-package us.semanter.app.vision;
+package us.semanter.app.vision.task;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -20,12 +20,11 @@ import org.opencv.imgproc.Imgproc;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
+import us.semanter.app.vision.result.FlattenerResult;
+import us.semanter.app.vision.result.GuessFactory;
 import us.semanter.app.vision.util.Polygon;
-import us.semanter.app.vision.util.VisionResult;
 
 import static org.opencv.android.Utils.bitmapToMat;
 import static org.opencv.android.Utils.matToBitmap;
@@ -51,7 +50,7 @@ public class Flattener implements Runnable {
 
     private Uri prior;
     private Bitmap priorImage;
-    private Result result;
+    private FlattenerResult result;
 
     private boolean finished;
 
@@ -106,7 +105,7 @@ public class Flattener implements Runnable {
         Bitmap flattenedAndCroppedImage = Bitmap.createBitmap(noteRegion.width, noteRegion.height, priorImage.getConfig());
         matToBitmap(croppedMat, flattenedAndCroppedImage);
 
-        this.result = new Result(prior, squares);
+        this.result = new FlattenerResult(prior, GuessFactory.outlineGuess(squares));
         finished = true;
         Log.d("Flattener", "finished");
     }
@@ -198,47 +197,7 @@ public class Flattener implements Runnable {
         return (dx1*dx2 + dy1*dy2)/Math.sqrt(Math.abs((dx1 * dx1 + dy1 * dy1) * (dx2 * dx2 + dy2 * dy2) + 1e-10));
     }
 
-    public Result getResult() {
+    public FlattenerResult getResult() {
         return result;
-    }
-
-    /**
-     * Immutable results of flattening
-     */
-    public class Result implements VisionResult {
-        private final Uri prior;
-        private final Map<Polygon, Float> confidenceMap;
-        private final List<Polygon> outlines;
-
-        public Result(Uri prior, List<Polygon> outlines) {
-            this.prior = prior;
-            this.outlines = new ArrayList<Polygon>(outlines);
-            confidenceMap = new HashMap<Polygon, Float>();
-
-            for(Polygon poly: outlines)
-                confidenceMap.put(poly, new Float(0));
-        }
-
-        public Uri getPrior() {
-            return prior;
-        }
-
-        public List<Polygon> getPolygons() {
-            return new ArrayList<Polygon>(outlines);
-        }
-
-        public float getConfidence(Polygon poly) throws Exception {
-            if(confidenceMap.containsKey(poly)) {
-                return confidenceMap.get(poly);
-            } else {
-                throw new Exception("Result does not contain Polygon.");
-            }
-        }
-
-        public Result setConfidence(Polygon poly, float confidence) {
-            Result updated = new Result(prior, outlines);
-            updated.confidenceMap.put(poly, confidence);
-            return updated;
-        }
     }
 }

@@ -19,13 +19,10 @@ import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Vector;
 
 import us.semanter.app.model.Note;
 import us.semanter.app.model.NoteListAdapter;
-import us.semanter.app.model.Tag;
 
 public class SearchActivity extends ActionBarActivity {
     private GridView noteList;
@@ -37,28 +34,7 @@ public class SearchActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
 
-        // FIXME test
-        final Tag[] testTags = new Tag[] {
-                new Tag("geometry"),
-                new Tag("project"),
-                new Tag("receipt"),
-                new Tag("whiteboard"),
-                new Tag("printed"),
-                new Tag("blog")
-        };
-
         List<Note> notes = new ArrayList<Note>();
-        for(int i=0; i < Math.random()*512 + 16; i++) {
-            List<Tag> tags = new Vector<Tag>();
-            for(int j=0; j < 4; j++)
-                tags.add(testTags[(int)(Math.random()*testTags.length)]);
-
-            Note newNote = new Note(new Date(), tags);
-            for(int j=0; j < (int)(Math.random()*4); j++)
-                newNote = newNote.nextTask();
-
-            notes.add(newNote);
-        }
 
         noteList = (GridView)findViewById(R.id.search_note_grid);
         noteListAdapter = new NoteListAdapter(this, R.layout.thumbnail_note, notes);

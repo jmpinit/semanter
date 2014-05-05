@@ -1,4 +1,4 @@
-package us.semanter.app.vision;
+package us.semanter.app.vision.task;
 
 public class Normalizer {
     class Result {
