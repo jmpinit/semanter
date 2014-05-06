@@ -5,9 +5,10 @@
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_review">ReviewActivity</string>
-    <string name="param_note">note</string>
     <string name="action_import">import</string>
     <string name="action_tag">action_tag</string>
     <string name="title_activity_tag">TagActivity</string>
+    <string name="param_notes">notes</string>
+    <string name="param_note">note</string>
 
 </resources>

@@ -16,13 +16,13 @@ import java.util.List;
 
 import us.semanter.app.R;
 
-public class NoteListAdapter extends BaseAdapter {
+public class NoteGridAdapter extends BaseAdapter {
     private Context mContext;
     private int resource;
 
     private List<Note> notes;
 
-    public NoteListAdapter(Context c, int resource, List<Note> notes) {
+    public NoteGridAdapter(Context c, int resource, List<Note> notes) {
         mContext = c;
         this.resource = resource;
 

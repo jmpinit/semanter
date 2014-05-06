@@ -51,7 +51,7 @@ public class TagView extends LinearLayout implements TagEditor.TagListener {
         this(context, null);
     }
 
-    private void addTag(final Tag tag) throws TagExistsException {
+    public void addTag(final Tag tag) throws TagExistsException {
         if(tags.add(tag)) {
             LayoutInflater inflater = LayoutInflater.from(context);
             Button button = (Button) inflater.inflate(R.layout.tag, null, false);

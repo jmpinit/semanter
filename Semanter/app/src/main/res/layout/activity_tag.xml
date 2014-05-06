@@ -5,32 +5,9 @@
     tools:context="us.semanter.app.TagActivity"
     android:orientation="vertical">
 
-    <GridView
-        android:layout_width="wrap_content"
-        android:layout_height="fill_parent"
-        android:id="@+id/activity_tag_notes"
-        android:layout_weight="5"
-        android:columnWidth="96dp"
-        android:drawSelectorOnTop="false"
-        android:numColumns="auto_fit" />
-
-    <LinearLayout
-        android:orientation="vertical"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:layout_weight="5">
-
-        <view
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            class="us.semanter.app.ui.TagView"
-            android:id="@id/activity_tag_tags" />
-
-        <view
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            class="us.semanter.app.ui.TagSorterView"
-            android:id="@id/activity_tag_sorter" />
-    </LinearLayout>
-
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/tag_note_list"
+        android:layout_gravity="center_horizontal" />
 </LinearLayout>

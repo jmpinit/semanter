@@ -1,8 +1,6 @@
 package us.semanter.app.vision.result;
 
 import android.net.Uri;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.util.Log;
 
 import org.json.JSONException;
@@ -63,6 +61,10 @@ public class FlattenerResult implements VisionResult, JSONable {
 
     @Override
     public JSONObject toJSON() throws JSONException {
+        JSONObject json = new JSONObject();
+
+        json.put("task_name", TASK_NAME);
+
         JSONObject outlinesJSON = new JSONObject();
 
         for(int i = 0; i < outlines.size(); i++) {
@@ -70,7 +72,6 @@ public class FlattenerResult implements VisionResult, JSONable {
             outlinesJSON.put("" + i, outline.toJSON());
         }
 
-        JSONObject json = new JSONObject();
         json.put("prior", prior.toString());
         json.put("outlines", outlinesJSON);
 
@@ -87,58 +88,4 @@ public class FlattenerResult implements VisionResult, JSONable {
 
         return true;
     }
-
-    /**
-     * Constructor for Parcelable
-     */
-    private FlattenerResult(Parcel in) {
-        try {
-            JSONObject json = new JSONObject(in.readString());
-
-            prior = Uri.parse(json.getString(KEY_PRIOR));
-
-            outlines = new ArrayList<OutlineGuess>();
-            JSONObject outlinesJSON = json.getJSONObject(KEY_OUTLINES);
-
-            for(int i = 0; outlinesJSON.has(""+i); i++) {
-                outlines.add(new OutlineGuess(outlinesJSON.getJSONObject("" + i)));
-            }
-        } catch(JSONException e) {
-            Log.e("Flattener", "Failed to construct because of JSONException. " + e.getMessage());
-        }
-    }
-
-        /*
-        Parcelable
-        format:
-        1) (String) prior
-        2) (int) size of confidenceMap
-        3..) (int, float) index of polygon,
-        3) (int) number of tags
-        4..n) (String) tag
-        n..) (Bundle) result
-         */
-
-    @Override
-    public void writeToParcel(Parcel out, int flags) {
-        try {
-            out.writeString(toJSON().toString());
-        } catch(JSONException e) {
-            Log.e(FlattenerResult.class.getCanonicalName(), "Failed to write to parcel because of JSONException. " + e.getMessage());
-        }
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    public static final Parcelable.Creator<FlattenerResult> CREATOR = new Parcelable.Creator<FlattenerResult>() {
-        public FlattenerResult createFromParcel(Parcel in) {
-            return new FlattenerResult(in);
-        }
-        public FlattenerResult[] newArray(int size) {
-            return new FlattenerResult[size];
-        }
-    };
 }

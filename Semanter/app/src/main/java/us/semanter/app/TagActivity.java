@@ -1,26 +1,25 @@
 package us.semanter.app;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.GridView;
+import android.widget.ListView;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import us.semanter.app.model.Note;
-import us.semanter.app.model.NoteListAdapter;
-import us.semanter.app.model.Tag;
-import us.semanter.app.ui.TagSorterView;
-import us.semanter.app.ui.TagView;
+import us.semanter.app.model.TagListAdapter;
 
 public class TagActivity extends ActionBarActivity {
-    private GridView gridView;
-    private NoteListAdapter adapter;
-    private TagView tags;
-    private TagSorterView sorter;
+    private ListView noteList;
+    private TagListAdapter adapter;
 
     private List<Note> notes;
 
@@ -29,26 +28,26 @@ public class TagActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tag);
 
-        /*Intent intent = getIntent();
-        Note[] noteArray = intent.getParcelableArrayExtra("notes");
+        Intent intent = getIntent();
+        String[] noteJSON = intent.getStringArrayExtra(getString(R.string.param_notes));
 
-        if(noteArray != null) {
-            notes = new ArrayList<Note>();
-            for (Object note : noteArray)
-                notes.add((Note) note);
-        } else {
+        try {
+            notes = new ArrayList<Note>(noteJSON.length);
+            for (String json : noteJSON)
+                notes.add(new Note(new JSONObject(json)));
+        } catch(JSONException e) {
+            e.printStackTrace();
+            Log.e("TagActivity", "Couldn't create note because of JSONException.");
             finish();
-        }*/
+        }
 
-        gridView = (GridView)findViewById(R.id.activity_tag_notes);
-        tags = (TagView)findViewById(R.id.activity_tag_tags);
-        sorter = (TagSorterView)findViewById(R.id.activity_tag_sorter);
+        for(Note note: notes)
+            Log.d("TagActivity", note.toString());
 
-        adapter = new NoteListAdapter(this, R.layout.thumbnail_note, notes);
+        noteList = (ListView)findViewById(R.id.tag_note_list);
+        adapter = new TagListAdapter(this, R.layout.row_tag, notes);
+        noteList.setAdapter(adapter);
         adapter.notifyDataSetChanged();
-
-        // FIXME test
-        sorter.addTags(new ArrayList<Tag>(Arrays.asList(new Tag[] { new Tag("hello"), new Tag("world"), new Tag("alice")})));
     }
 
     @Override

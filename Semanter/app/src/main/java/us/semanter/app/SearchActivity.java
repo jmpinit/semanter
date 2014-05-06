@@ -14,6 +14,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
 
+import org.json.JSONException;
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
@@ -25,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 import us.semanter.app.model.Note;
-import us.semanter.app.model.NoteListAdapter;
+import us.semanter.app.model.NoteGridAdapter;
 import us.semanter.app.vision.VisionPipeline;
 import us.semanter.app.vision.task.Flattener;
 import us.semanter.app.vision.task.TaskListener;
@@ -33,7 +34,7 @@ import us.semanter.app.vision.util.VisionResult;
 
 public class SearchActivity extends ActionBarActivity implements TaskListener {
     private GridView noteList;
-    private NoteListAdapter noteListAdapter;
+    private NoteGridAdapter noteGridAdapter;
 
     private List<Note> notes;
     private Map<Runnable, Note> taskMap;
@@ -47,13 +48,18 @@ public class SearchActivity extends ActionBarActivity implements TaskListener {
         taskMap = new HashMap<Runnable, Note>();
 
         noteList = (GridView)findViewById(R.id.search_note_grid);
-        noteListAdapter = new NoteListAdapter(this, R.layout.thumbnail_note, notes);
-        noteList.setAdapter(noteListAdapter);
+        noteGridAdapter = new NoteGridAdapter(this, R.layout.thumbnail_note, notes);
+        noteList.setAdapter(noteGridAdapter);
 
         final Intent reviewIntent = new Intent(this, ReviewActivity.class);
         noteList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-                reviewIntent.putExtra(getString(R.string.param_note), (Note)noteListAdapter.getItem(position));
+                try {
+                    reviewIntent.putExtra(getString(R.string.param_note), ((Note) noteGridAdapter.getItem(position)).toJSON().toString());
+                } catch(JSONException e) {
+                    e.printStackTrace();
+                    Log.e("SearchActivity", "Couldn't send note to ReviewActivity because of JSONException.");
+                }
                 reviewIntent.putExtra("task", VisionPipeline.Task.FLATTEN.getName());
                 startActivity(reviewIntent);
             }
@@ -69,7 +75,7 @@ public class SearchActivity extends ActionBarActivity implements TaskListener {
 
                 notes.remove(note);
                 notes.add(note.addResult(result));
-                noteListAdapter.notifyDataSetChanged();
+                noteGridAdapter.notifyDataSetChanged();
             }
         });
     }
@@ -109,7 +115,7 @@ public class SearchActivity extends ActionBarActivity implements TaskListener {
 
         taskMap.put(flattener, newNote);
         notes.add(newNote);
-        noteListAdapter.notifyDataSetChanged();
+        noteGridAdapter.notifyDataSetChanged();
 
         // start processing
         (new Thread(flattener)).start();
@@ -131,8 +137,19 @@ public class SearchActivity extends ActionBarActivity implements TaskListener {
                 break;
             case R.id.action_tag:
                 Intent tagIntent = new Intent(this, TagActivity.class);
-                tagIntent.putExtra("notes", notes.toArray());
-                startActivity(tagIntent);
+                String[] noteJSON = new String[notes.size()];
+
+                try {
+                    for (int i = 0; i < notes.size(); i++)
+                        noteJSON[i] = notes.get(i).toJSON().toString();
+
+                    tagIntent.putExtra(getString(R.string.param_notes), noteJSON);
+                    startActivity(tagIntent);
+                } catch(JSONException e) {
+                    e.printStackTrace();
+                    Log.e("SearchActivity", "Couldn't send note because of JSONException.");
+                }
+
                 break;
         }
 

@@ -1,20 +1,25 @@
 package us.semanter.app.model;
 
 import android.os.Bundle;
-import android.os.Parcel;
-import android.os.Parcelable;
+import android.util.Log;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import us.semanter.app.vision.VisionResultFactory;
+import us.semanter.app.vision.util.JSONable;
 import us.semanter.app.vision.util.VisionResult;
 
 /**
  * Immutable in-memory representation of note
  */
-public class Note implements Parcelable {
+public class Note implements JSONable {
     private final Date date;
     private final Set<Tag> tags;
     private Bundle results;
@@ -38,29 +43,26 @@ public class Note implements Parcelable {
         this(date, new HashSet<Tag>());
     }
 
-    /**
-     * Constructor for Parcelable
-     */
-    private Note(Parcel in) {
-        date = new Date(in.readLong());
-        resultCount = in.readInt();
-
-        String[] tagNames = new String[in.readInt()];
-        in.readStringArray(tagNames);
-
-        tags = new HashSet<Tag>();
-        for(String tagName: tagNames)
-            tags.add(new Tag(tagName));
-
-        results = in.readBundle();
+    public Note addTag(Tag tag) {
+        Note newNote = new Note(this.date, this.tags);
+        this.tags.add(tag);
+        newNote.results = results;
+        return newNote;
     }
 
     public Note addResult(VisionResult result) {
-        Note newNote = new Note(this.date, this.tags);
-        newNote.results = results;
-        newNote.results.putParcelable(result.getTaskName(), result);
-        newNote.resultCount = resultCount + 1;
-        return newNote;
+        try {
+            Note newNote = new Note(this.date, this.tags);
+            newNote.results = results;
+            newNote.results.putString(result.getTaskName(), result.toJSON().toString());
+            newNote.resultCount = resultCount + 1;
+            return newNote;
+        } catch(JSONException e) {
+            e.printStackTrace();
+            Log.e("Note", "Couldn't add result because of JSON exception.");
+        }
+
+        return null;
     }
 
     public int getResultCount() {
@@ -75,47 +77,76 @@ public class Note implements Parcelable {
         return new HashSet<Tag>(tags);
     }
 
-    public VisionResult getResult(ClassLoader loader, String name) {
-        results.setClassLoader(loader);
-        return results.getParcelable(name);
+    public VisionResult getResult(String name) {
+        try {
+            return VisionResultFactory.fromJSON(new JSONObject(results.getString(name)));
+        } catch(JSONException e) {
+            e.printStackTrace();
+            Log.e("Note", "Couldn't get result because of JSONException.");
+        }
+
+        return null;
     }
 
     /*
-    Parcelable
-    format:
-    1) (long) Unix time stamp
-    2) (int) addResult
-    3) (int) number of tags
-    4..n) (String) tag
-    n..) (Bundle) result
+    JSONable
      */
 
-    @Override
-    public void writeToParcel(Parcel out, int flags) {
-        out.writeLong(date.getTime());
-        out.writeInt(resultCount);
+    public Note(JSONObject json) throws JSONException {
+        Note newNote = null;
 
-        out.writeInt(tags.size());
-        String[] tagNames = new String[tags.size()];
-        { int i = 0; for(Tag t: tags)
-            tagNames[i++] = t.getValue(); }
-        out.writeStringArray(tagNames);
+        Date date = new Date(json.getLong("date"));
+        int resultCount = json.getInt("result_count");
 
-        out.writeBundle(results);
+        Set<Tag> tags = new HashSet<Tag>();
+        JSONObject tagJSON = json.getJSONObject("tags");
+        for(int i=0; tagJSON.has(""+i); i++)
+            tags.add(new Tag(tagJSON.getString(""+i)));
+
+        Bundle results = new Bundle();
+        JSONObject resultsJSON = json.getJSONObject("results");
+        Iterator<String> resultItr = resultsJSON.keys();
+        while(resultItr.hasNext()) {
+            String taskName = resultItr.next();
+            results.putString(taskName, resultsJSON.getString(taskName));
+        }
+
+        this.date = date;
+        this.resultCount = resultCount;
+        this.tags = tags;
+        this.results = results;
     }
 
     @Override
-    public int describeContents() {
-        return 0;
+    public JSONObject toJSON() throws JSONException {
+        JSONObject json = new JSONObject();
+        json.put("date", date.getTime());
+        json.put("result_count", resultCount);
+
+        JSONObject tagJSON = new JSONObject();
+        int i = 0;
+        for(Tag t: tags)
+            tagJSON.put("" + i++, t.getValue());
+
+        json.put("tags", tagJSON);
+
+        JSONObject resultJSON = new JSONObject();
+        for(String resName: results.keySet()) {
+            resultJSON.put(resName, results.get(resName));
+        }
+
+        json.put("results", resultJSON);
+
+        return json;
     }
 
-    public static final Parcelable.Creator<Note> CREATOR = new Parcelable.Creator<Note>() {
-        public Note createFromParcel(Parcel in) {
-            return new Note(in);
+    @Override
+    public String toString() {
+        try {
+            return toJSON().toString(4);
+        } catch(Exception e) {
+            e.printStackTrace();
+            return "";
         }
-
-        public Note[] newArray(int size) {
-            return new Note[size];
-        }
-    };
+    }
 }

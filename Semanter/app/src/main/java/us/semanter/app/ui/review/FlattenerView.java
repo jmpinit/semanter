@@ -17,7 +17,7 @@ import us.semanter.app.vision.result.FlattenerResult;
 import us.semanter.app.vision.result.OutlineGuess;
 import us.semanter.app.vision.util.VisionResult;
 
-public class FlattenerView extends VisionView {
+public class FlattenerView extends VisionView implements Reviewer {
     private FlattenerResult result;
     private Bitmap prior;
 
