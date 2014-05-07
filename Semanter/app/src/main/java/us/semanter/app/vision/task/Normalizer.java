@@ -26,7 +26,7 @@ public class Normalizer extends TaskNode {
 
         // TODO normalize image
 
-        VisionUtil.saveMat(source, bmpConfig, getResultPath(sourcePath));
+        VisionUtil.saveMat(source, bmpConfig, getResultPath(sourcePath).toString());
 
         dispatch(sourcePath);
     }

@@ -62,10 +62,12 @@ public class Flattener extends TaskNode {
 
         if(squares.size() == 0) {
             // make no change
-            VisionUtil.saveMat(source, bmpConfig, getResultPath(sourcePath));
+            VisionUtil.saveMat(source, bmpConfig, getResultPath(sourcePath).toString());
         } else {
             // get largest and assume it is the notes
             Polygon notePage = Polygon.largest(squares);
+
+            Log.d("Flattener", notePage.toString());
 
             // calculate deskew transform
             final double paperWidth = 8.5 * 50;
@@ -82,20 +84,20 @@ public class Flattener extends TaskNode {
             Mat transformation = Imgproc.getPerspectiveTransform(sourcePerspective, destinationPerspective);
 
             // apply transform
-            Mat deskewed = new Mat();
-            Imgproc.warpPerspective(source, deskewed, transformation, new Size(source.width(), source.height()));
+            Mat flattened = new Mat();
+            Imgproc.warpPerspective(source, flattened, transformation, new Size(source.width(), source.height()));
 
             // crop to just note
             Rect noteRegion = new Rect(0, 0, (int) paperWidth, (int) paperHeight);
-            Mat croppedRef = new Mat(deskewed, noteRegion);
-            Mat croppedMat = new Mat(croppedRef.width(), croppedRef.height(), croppedRef.type());
-            croppedRef.copyTo(croppedMat);
+            Mat croppedRef = new Mat(flattened, noteRegion);
 
             // save result
-            VisionUtil.saveMat(croppedMat, bmpConfig, getResultPath(sourcePath));
+            VisionUtil.saveMat(croppedRef, bmpConfig, getResultPath(sourcePath).toString());
+
+            Log.d("Flattener", "Saved result to " + getResultPath(sourcePath));
         }
 
-        dispatch(sourcePath);
+        dispatch(getResultPath(sourcePath).toString());
     }
 
     private List<Polygon> findSquares(Mat image) {

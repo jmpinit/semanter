@@ -23,16 +23,17 @@ public class NoteFactory {
     /**
      * @param imagePath path of an image to use as the source of the note
      */
-    public static void createNewNote(Context ctx, String imagePath) throws IOException {
+    public static File createNewNote(Context ctx, String imagePath) throws IOException {
         File image = new File(imagePath);
         String extension = FilenameUtils.getExtension(image.getName());
 
         // get when the image was taken or last modified
         // TODO use EXIF if possible
         android.text.format.DateFormat df = new android.text.format.DateFormat();
-        String dateTaken = df.format("yyyy-MM-dd", image.lastModified()).toString();
+        String dateTaken = df.format("yyyy_MM_dd", image.lastModified()).toString();
 
-        String noteName = dateTaken + "-" + UUID.randomUUID();
+        String uid = UUID.randomUUID().toString().replace("-", "").substring(0, 8); // friendly almost-UUID
+        String noteName = dateTaken + "-" + uid;
 
         File dataPath = ctx.getExternalFilesDir(null);
         File noteBaseDir = new File(dataPath + "/notes/");
@@ -47,7 +48,10 @@ public class NoteFactory {
             noteDir.mkdir();
 
         // copy in the image
-        copy(image, new File(noteDir + "/" + noteName + "-source." + extension));
+        File destination = new File(noteDir + "/" + noteName + "-source." + extension);
+        copy(image, destination);
+
+        return destination;
     }
 
     private static void copy(File src, File dst) throws IOException {

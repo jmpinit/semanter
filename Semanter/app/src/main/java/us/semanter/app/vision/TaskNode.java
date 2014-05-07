@@ -2,8 +2,6 @@ package us.semanter.app.vision;
 
 import android.graphics.Bitmap;
 
-import org.apache.commons.io.FilenameUtils;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +34,7 @@ public abstract class TaskNode {
         hashCached = false;
 
         // must be called after adding children
-        generateUID();
+        uid = generateUID();
     }
 
     public TaskNode() {
@@ -102,12 +100,13 @@ public abstract class TaskNode {
         return uid;
     }
 
-    public String getResultPath(String sourcePath) {
+    public File getResultPath(String sourcePath) {
         File sourceFile = new File(sourcePath);
-        String parent = sourceFile.getParent();
-        String name = FilenameUtils.removeExtension(sourceFile.getName());
+        File noteFolder = new File(sourceFile.getParent());
 
-        return parent + "/" + name + "-" + getUID() + ".bmp";
+        File result = new File(noteFolder + "/" + noteFolder.getName() + "-" + getUID() + ".png");
+
+        return result;
     }
 
     @Override

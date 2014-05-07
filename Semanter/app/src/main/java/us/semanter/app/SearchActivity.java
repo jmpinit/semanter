@@ -108,20 +108,20 @@ public class SearchActivity extends ActionBarActivity {
 
         // create note out of image
         try {
-            NoteFactory.createNewNote(this, filePath);
+            String noteSourcePath = NoteFactory.createNewNote(this, filePath).toString();
+
+            // TODO use EXIF for date
+            Note newNote = new Note(new Date());
+
+            notes.add(newNote);
+            noteGridAdapter.notifyDataSetChanged();
+
+            // start processing
+            VisionService.startActionImport(this, noteSourcePath);
         } catch(IOException e) {
             e.printStackTrace();
             Log.e("SearchActivity", "Couldn't create directory to store note.");
         }
-
-        // TODO use EXIF for date
-        Note newNote = new Note(new Date());
-
-        notes.add(newNote);
-        noteGridAdapter.notifyDataSetChanged();
-
-        // start processing
-        VisionService.startActionImport(this, filePath);
     }
 
     @Override
