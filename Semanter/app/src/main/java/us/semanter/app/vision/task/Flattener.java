@@ -1,11 +1,7 @@
 package us.semanter.app.vision.task;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.util.Log;
 
-import org.opencv.android.Utils;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -21,14 +17,11 @@ import org.opencv.imgproc.Imgproc;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Vector;
 
-import us.semanter.app.vision.result.FlattenerResult;
-import us.semanter.app.vision.result.GuessFactory;
+import us.semanter.app.vision.TaskNode;
+import us.semanter.app.vision.VisionUtil;
 import us.semanter.app.vision.util.Polygon;
 
-import static org.opencv.android.Utils.bitmapToMat;
-import static org.opencv.android.Utils.matToBitmap;
 import static org.opencv.imgproc.Imgproc.CHAIN_APPROX_SIMPLE;
 import static org.opencv.imgproc.Imgproc.COLOR_BGR2GRAY;
 import static org.opencv.imgproc.Imgproc.COLOR_RGB2GRAY;
@@ -45,90 +38,68 @@ import static org.opencv.imgproc.Imgproc.isContourConvex;
 import static org.opencv.imgproc.Imgproc.medianBlur;
 import static org.opencv.imgproc.Imgproc.threshold;
 
-public class Flattener implements Runnable {
+public class Flattener extends TaskNode {
+    private static final String TASK_NAME = "flatten";
+
+    // operation parameters (potentially subject to correction)
+    // TODO allow corrections to be specified
     private static final int SQUARE_SIZE = 25000; // FIXME train on this somehow
     private static final double THRESHOLD_COS = 0.05; // FIXME train on this somehow
 
-    private Uri prior;
-    private Bitmap priorImage;
-    private FlattenerResult result;
-
-    private List<TaskListener> listeners;
-    private boolean finished;
-
-    public Flattener(Uri prior) {
-        this.prior = prior;
-        priorImage = BitmapFactory.decodeFile(prior.getPath());
-        listeners = new Vector<TaskListener>();
-        finished = false;
+    public Flattener() {
+        super();
     }
 
-    public void registerListener(TaskListener listener) {
-        listeners.add(listener);
+    public Flattener(List<TaskNode> children) {
+        super(children);
     }
 
-    private void dispatch(FlattenerResult result) {
-        for(TaskListener listener: listeners) {
-            listener.onTaskCompleted(this, result);
-        }
-    }
+    public void operateOn(String sourcePath) {
+        Mat source = VisionUtil.matFromFile(sourcePath);
 
-    public void run() {
         // find paper
-        List<Polygon> squares = findSquares(priorImage);
+        List<Polygon> squares = findSquares(source);
 
-        // image into OpenCV
-        Mat imageMat = new Mat();
-        bitmapToMat(priorImage, imageMat);
-
-        /*
         if(squares.size() == 0) {
-            // TODO indicate failure
+            // make no change
+            VisionUtil.saveMat(source, bmpConfig, getResultPath(sourcePath));
+        } else {
+            // get largest and assume it is the notes
+            Polygon notePage = Polygon.largest(squares);
+
+            // calculate deskew transform
+            final double paperWidth = 8.5 * 50;
+            final double paperHeight = 11 * 50;
+
+            Mat sourcePerspective = notePage.toMatOfPoint2f();
+            Mat destinationPerspective = new MatOfPoint2f(
+                    new Point(paperWidth, 0),
+                    new Point(paperWidth, paperHeight),
+                    new Point(0, paperHeight),
+                    new Point(0, 0)
+            );
+
+            Mat transformation = Imgproc.getPerspectiveTransform(sourcePerspective, destinationPerspective);
+
+            // apply transform
+            Mat deskewed = new Mat();
+            Imgproc.warpPerspective(source, deskewed, transformation, new Size(source.width(), source.height()));
+
+            // crop to just note
+            Rect noteRegion = new Rect(0, 0, (int) paperWidth, (int) paperHeight);
+            Mat croppedRef = new Mat(deskewed, noteRegion);
+            Mat croppedMat = new Mat(croppedRef.width(), croppedRef.height(), croppedRef.type());
+            croppedRef.copyTo(croppedMat);
+
+            // save result
+            VisionUtil.saveMat(croppedMat, bmpConfig, getResultPath(sourcePath));
         }
-        */
 
-        // get largest and assume it is the notes
-        Polygon notePage = Polygon.largest(squares);
-
-        // calculate deskew transform
-        final double paperWidth = 8.5*50;
-        final double paperHeight = 11*50;
-
-        Mat sourcePerspective = notePage.toMatOfPoint2f();
-        Mat destinationPerspective = new MatOfPoint2f(
-                new Point(paperWidth, 0),
-                new Point(paperWidth, paperHeight),
-                new Point(0, paperHeight),
-                new Point(0, 0)
-        );
-
-        Mat transformation = Imgproc.getPerspectiveTransform(sourcePerspective, destinationPerspective);
-
-        // apply transform
-        Mat deskewed = new Mat();
-        Imgproc.warpPerspective(imageMat, deskewed, transformation, new Size(imageMat.width(), imageMat.height()));
-
-        // crop to just note
-        Rect noteRegion = new Rect(0, 0, (int)paperWidth, (int)paperHeight);
-        Mat croppedRef = new Mat(deskewed, noteRegion);
-        Mat croppedMat = new Mat(croppedRef.width(), croppedRef.height(), croppedRef.type());
-        croppedRef.copyTo(croppedMat);
-
-        // image out of OpenCV
-        Bitmap flattenedAndCroppedImage = Bitmap.createBitmap(noteRegion.width, noteRegion.height, priorImage.getConfig());
-        matToBitmap(croppedMat, flattenedAndCroppedImage);
-
-        this.result = new FlattenerResult(prior, GuessFactory.outlineGuess(squares));
-        finished = true;
-
-        dispatch(result);
+        dispatch(sourcePath);
     }
 
-    private List<Polygon> findSquares(Bitmap source) {
+    private List<Polygon> findSquares(Mat image) {
         ArrayList<Polygon> squares;
-
-        Mat image = new Mat();
-        Utils.bitmapToMat(source, image);
 
         Mat bwImage = new Mat();
         cvtColor(image, bwImage, COLOR_RGB2GRAY);
@@ -202,6 +173,10 @@ public class Flattener implements Runnable {
         return squares;
     }
 
+    public String getTaskName() {
+        return TASK_NAME;
+    }
+
     private double angle(Point pt1, Point pt2, Point pt0) {
         double dx1 = pt1.x - pt0.x;
         double dy1 = pt1.y - pt0.y;
@@ -209,9 +184,5 @@ public class Flattener implements Runnable {
         double dy2 = pt2.y - pt0.y;
 
         return (dx1*dx2 + dy1*dy2)/Math.sqrt(Math.abs((dx1 * dx1 + dy1 * dy1) * (dx2 * dx2 + dy2 * dy2) + 1e-10));
-    }
-
-    public FlattenerResult getResult() {
-        return result;
     }
 }

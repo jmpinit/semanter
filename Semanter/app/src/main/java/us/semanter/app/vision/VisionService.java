@@ -3,12 +3,12 @@ package us.semanter.app.vision;
 import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.util.Log;
 
+import java.util.Arrays;
+
 import us.semanter.app.vision.task.Flattener;
-import us.semanter.app.vision.task.TaskListener;
-import us.semanter.app.vision.util.VisionResult;
+import us.semanter.app.vision.task.Normalizer;
 
 /**
  * Processes images through a vision pipeline, saves the results, and notifies bound listeners.
@@ -23,6 +23,30 @@ public class VisionService extends IntentService {
     private static final String EXTRA_NOTE = "us.semanter.app.vision.extra.NOTE";
     private static final String EXTRA_PIPE_NAME = "us.semanter.app.vision.extra.PIPE_NAME";
     private static final String EXTRA_ALTERNATIVE = "us.semanter.app.vision.extra.ALTERNATIVE";
+
+    private TaskNode rootOperation;
+
+    public VisionService() {
+        super("VisionService");
+
+        // construct the initial operation tree carried out by the service.
+        TaskNode normalize = new Normalizer();
+        TaskNode flatten = new Flattener(Arrays.asList(new TaskNode[] {normalize}));
+
+        rootOperation = flatten;
+
+        rootOperation.registerListenerForAll(new TaskNode.NodeListener() {
+            @Override
+            public void onTaskCompleted(String changePath) {
+                Log.d("VisionService", "Finished modifying " + changePath + " succesfully.");
+
+                Intent changeNotification = new Intent();
+                changeNotification.setAction(ACTION_UPDATE);
+                changeNotification.putExtra(EXTRA_SOURCE, changePath);
+                sendBroadcast(changeNotification);
+            }
+        });
+    }
 
     /**
      * Imports photo into Vision system by throwing it into the root Pipe.
@@ -47,10 +71,6 @@ public class VisionService extends IntentService {
         context.startService(intent);
     }
 
-    public VisionService() {
-        super("VisionService");
-    }
-
     @Override
     protected void onHandleIntent(Intent intent) {
         if (intent != null) {
@@ -69,21 +89,7 @@ public class VisionService extends IntentService {
     }
 
     private void handleActionImport(final String sourcePath) {
-        Flattener task = new Flattener(Uri.parse(sourcePath));
-        task.registerListener(new TaskListener() {
-            @Override
-            public void onTaskCompleted(Runnable task, VisionResult result) {
-                Log.d("VisionService", "Finished succesfully.");
-
-                Intent changeNotification = new Intent();
-                changeNotification.setAction(ACTION_UPDATE);
-                changeNotification.putExtra(EXTRA_SOURCE, sourcePath);
-                sendBroadcast(changeNotification);
-            }
-        });
-
-        Thread taskThread = new Thread(task);
-        taskThread.start();
+        rootOperation.operateOn(sourcePath);
     }
 
     private void handleActionCorrect(String sourcePath, String pipeName, String alternative) {

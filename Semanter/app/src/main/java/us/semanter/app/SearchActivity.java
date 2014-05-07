@@ -22,11 +22,13 @@ import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import us.semanter.app.model.Note;
+import us.semanter.app.model.NoteFactory;
 import us.semanter.app.model.NoteGridAdapter;
 import us.semanter.app.vision.VisionService;
 
@@ -103,6 +105,14 @@ public class SearchActivity extends ActionBarActivity {
         int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
         String filePath = cursor.getString(columnIndex);
         cursor.close();
+
+        // create note out of image
+        try {
+            NoteFactory.createNewNote(this, filePath);
+        } catch(IOException e) {
+            e.printStackTrace();
+            Log.e("SearchActivity", "Couldn't create directory to store note.");
+        }
 
         // TODO use EXIF for date
         Note newNote = new Note(new Date());
