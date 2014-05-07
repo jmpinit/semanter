@@ -28,6 +28,11 @@
             android:name="us.semanter.app.TagActivity"
             android:label="@string/title_activity_tag" >
         </activity>
+
+        <service
+            android:name=".vision.VisionService"
+            android:exported="false" >
+        </service>
     </application>
 
 </manifest>

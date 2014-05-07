@@ -1,6 +1,9 @@
 package us.semanter.app;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -21,23 +24,17 @@ import org.opencv.android.OpenCVLoader;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import us.semanter.app.model.Note;
 import us.semanter.app.model.NoteGridAdapter;
-import us.semanter.app.vision.VisionPipeline;
-import us.semanter.app.vision.task.Flattener;
-import us.semanter.app.vision.task.TaskListener;
-import us.semanter.app.vision.util.VisionResult;
+import us.semanter.app.vision.VisionService;
 
-public class SearchActivity extends ActionBarActivity implements TaskListener {
+public class SearchActivity extends ActionBarActivity {
     private GridView noteList;
     private NoteGridAdapter noteGridAdapter;
 
     private List<Note> notes;
-    private Map<Runnable, Note> taskMap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,39 +42,39 @@ public class SearchActivity extends ActionBarActivity implements TaskListener {
         setContentView(R.layout.activity_search);
 
         notes = new ArrayList<Note>();
-        taskMap = new HashMap<Runnable, Note>();
 
         noteList = (GridView)findViewById(R.id.search_note_grid);
         noteGridAdapter = new NoteGridAdapter(this, R.layout.thumbnail_note, notes);
         noteList.setAdapter(noteGridAdapter);
 
         final Intent reviewIntent = new Intent(this, ReviewActivity.class);
+        final Context activityContext = this;
         noteList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-                try {
+                /*try {
                     reviewIntent.putExtra(getString(R.string.param_note), ((Note) noteGridAdapter.getItem(position)).toJSON().toString());
                 } catch(JSONException e) {
                     e.printStackTrace();
                     Log.e("SearchActivity", "Couldn't send note to ReviewActivity because of JSONException.");
                 }
                 reviewIntent.putExtra("task", VisionPipeline.Task.FLATTEN.getName());
-                startActivity(reviewIntent);
+                startActivity(reviewIntent);*/
             }
         });
+
+        startService(new Intent(this, VisionService.class));
     }
 
     @Override
-    public void onTaskCompleted(final Runnable task, final VisionResult result) {
-        runOnUiThread(new Runnable() {
-            public void run() {
-                Note note = taskMap.get(task);
-                taskMap.remove(task);
+    public void onStart() {
+        super.onStart();
 
-                notes.remove(note);
-                notes.add(note.addResult(result));
-                noteGridAdapter.notifyDataSetChanged();
+        registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Log.d("SearchActivity", "I see an update of " + intent.getStringExtra(VisionService.EXTRA_SOURCE));
             }
-        });
+        }, new IntentFilter(VisionService.ACTION_UPDATE));
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent imageReturnedIntent) {
@@ -110,15 +107,11 @@ public class SearchActivity extends ActionBarActivity implements TaskListener {
         // TODO use EXIF for date
         Note newNote = new Note(new Date());
 
-        Flattener flattener = new Flattener(Uri.parse(filePath));
-        flattener.registerListener(this);
-
-        taskMap.put(flattener, newNote);
         notes.add(newNote);
         noteGridAdapter.notifyDataSetChanged();
 
         // start processing
-        (new Thread(flattener)).start();
+        VisionService.startActionImport(this, filePath);
     }
 
     @Override

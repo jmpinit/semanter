@@ -36,6 +36,11 @@ public class FlattenerResult implements VisionResult, JSONable {
         return prior;
     }
 
+    @Override
+    public Uri getCurrent() {
+        return null;
+    }
+
     public List<OutlineGuess> getOutlines() {
         return new ArrayList<OutlineGuess>(outlines);
     }

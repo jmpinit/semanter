@@ -36,7 +36,7 @@ public class ReviewActivity extends ActionBarActivity {
         if(taskName.equals(VisionPipeline.Task.FLATTEN.getName())) {
             setContentView(R.layout.review_flatten);
             visionView = (VisionView)findViewById(R.id.flatten_reviewer);
-            visionView.review(noteToReview.getResult(VisionPipeline.Task.FLATTEN.getName()));
+            //visionView.review(noteToReview.getResult(VisionPipeline.Task.FLATTEN.getName()));
         } else {
             Log.e("ReviewActivity", "unrecognized task.");
             finish();
