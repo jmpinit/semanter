@@ -3,20 +3,22 @@ package us.semanter.app.ui;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import us.semanter.app.R;
 import us.semanter.app.model.Tag;
+import us.semanter.app.model.TagListener;
 
-public class TagView extends LinearLayout implements TagEditor.TagListener {
+public class TagView extends LinearLayout implements TagEditor.Listener {
     private Context context;
     private LinearLayout tagLayout;
     private TagEditor editorView;
@@ -24,8 +26,12 @@ public class TagView extends LinearLayout implements TagEditor.TagListener {
     private Set<Tag> tags;
     private Map<Tag, Button> tagButtons;
 
+    private List<TagListener> listeners;
+
     public TagView(Context context, AttributeSet attrs) {
         super(context, attrs);
+
+        listeners = new ArrayList<TagListener>();
 
         this.context = context;
 
@@ -59,7 +65,7 @@ public class TagView extends LinearLayout implements TagEditor.TagListener {
             button.setText(tag.getValue());
             button.setOnClickListener(new OnClickListener() {
                 @Override
-                public void onClick(View v) {
+                public void onClick(android.view.View v) {
                     removeTag(tag);
                 }
             });
@@ -74,14 +80,32 @@ public class TagView extends LinearLayout implements TagEditor.TagListener {
     private synchronized void removeTag(Tag tag) {
         tags.remove(tag);
         tagLayout.removeView(tagButtons.get(tag));
+        dispatchRemove(tag);
     }
 
     public void onNewTag(Tag newTag) {
         try {
             addTag(newTag);
+            dispatchNew(newTag);
         } catch(TagExistsException e) {
             Toast.makeText(context, "tag already added", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void dispatchNew(Tag tag) {
+        for(TagListener listener: listeners) {
+            listener.onNewTag(tag);
+        }
+    }
+
+    private void dispatchRemove(Tag tag) {
+        for(TagListener listener: listeners) {
+            listener.onRemoveTag(tag);
+        }
+    }
+
+    public void registerListener(TagListener listener) {
+        listeners.add(listener);
     }
 
     public Set getTags() {

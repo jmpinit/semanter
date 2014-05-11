@@ -27,6 +27,8 @@ public class NoteFactory {
     public final static String FILE_META_DATA = "meta.json";
     public final static String FILE_SOURCE = "source.png";
 
+    // TODO validate note directories and content (checkrep)g
+
     /**
      * @param sourcePath image filepath
      * @return filepath of note folder (assumed to be parent directory of image)
@@ -55,8 +57,7 @@ public class NoteFactory {
         String uid = UUID.randomUUID().toString().replace("-", "").substring(0, 8); // friendly almost-UUID
         String noteName = dateTaken + "-" + uid;
 
-        File dataPath = ctx.getExternalFilesDir(null);
-        File noteBaseDir = new File(dataPath + "/notes/");
+        File noteBaseDir = getNotesDir(ctx);
         File noteDir = new File(noteBaseDir + "/" + noteName);
 
         // create the folders if they don't exist
@@ -72,16 +73,8 @@ public class NoteFactory {
         copy(image, destination);
 
         // create a note
-        Note newNote = new Note(date);
-        File noteFile = new File(noteDir + "/" + noteName + "-" + FILE_META_DATA);
-
-        try {
-            PrintWriter noteWriter = new PrintWriter(noteFile, "UTF-8");
-            noteWriter.print(newNote.toJSON().toString());
-            noteWriter.close();
-        } catch(JSONException e) {
-            ExceptionUtility.printException(NoteFactory.class, e, "Couldn't write initial note meta file to " + noteFile + " because of JSONException.");
-        }
+        Note newNote = new Note(noteName, date);
+        saveMeta(ctx, newNote);
 
         return destination;
     }
@@ -110,8 +103,7 @@ public class NoteFactory {
             JSONObject json = new JSONObject(getStringFromFile(getNoteItem(noteDir, FILE_META_DATA).toString()));
             return new Note(json);
         } catch(Exception e) {
-            e.printStackTrace();
-            Log.e("NoteFactory", "Couldn't create new note from meta file.");
+            ExceptionUtility.printException(NoteFactory.class, e, "Couldn't create new note from meta file.");
             return null;
         }
     }
@@ -136,6 +128,32 @@ public class NoteFactory {
 
         return notes;
     }
+
+    public static File getNoteDir(Context ctx, String noteName) {
+        return new File(ctx.getExternalFilesDir(null) + "/notes/" + noteName);
+    }
+
+    public static File getNotesDir(Context ctx) {
+        return new File(ctx.getExternalFilesDir(null) + "/notes");
+    }
+
+    public static void saveMeta(Context ctx, Note note) {
+        File noteFile = new File(getNoteDir(ctx, note.getName()) + "/" + note.getName() + "-" + FILE_META_DATA);
+
+        try {
+            PrintWriter noteWriter = new PrintWriter(noteFile, "UTF-8");
+            noteWriter.print(note.toJSON().toString());
+            noteWriter.close();
+        } catch(JSONException e) {
+            ExceptionUtility.printException(NoteFactory.class, e, "Couldn't write initial note meta file to " + noteFile + " because of JSONException.");
+        } catch(Exception e) {
+            ExceptionUtility.printException(NoteFactory.class, e, "Couldn't write initial note meta file to " + noteFile + ".");
+        }
+    }
+
+    /*
+    Helper methods
+     */
 
     private static File getNoteItem(File noteDir, String item) {
         String noteName = noteDir.getName();

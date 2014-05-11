@@ -13,6 +13,11 @@ public class Tag {
     public String getValue() { return value; }
 
     @Override
+    public String toString() {
+        return value;
+    }
+
+    @Override
     public int hashCode() {
         return value.hashCode();
     }

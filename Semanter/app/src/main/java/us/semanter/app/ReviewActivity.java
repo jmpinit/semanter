@@ -12,7 +12,6 @@ import org.json.JSONObject;
 
 import us.semanter.app.model.Note;
 import us.semanter.app.ui.VisionView;
-import us.semanter.app.vision.VisionPipeline;
 
 public class ReviewActivity extends ActionBarActivity {
     private Note noteToReview;
@@ -32,7 +31,9 @@ public class ReviewActivity extends ActionBarActivity {
             finish();
         }
 
-        String taskName = intent.getStringExtra("task");
+
+
+        /*String taskName = intent.getStringExtra("task");
         if(taskName.equals(VisionPipeline.Task.FLATTEN.getName())) {
             setContentView(R.layout.review_flatten);
             visionView = (VisionView)findViewById(R.id.flatten_reviewer);
@@ -40,7 +41,7 @@ public class ReviewActivity extends ActionBarActivity {
         } else {
             Log.e("ReviewActivity", "unrecognized task.");
             finish();
-        }
+        }*/
     }
 
     @Override

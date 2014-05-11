@@ -17,8 +17,6 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
 
-import org.json.JSONException;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -161,26 +159,13 @@ public class SearchActivity extends ActionBarActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
         switch(item.getItemId()) {
             case R.id.action_import:
                 importPhoto();
                 break;
             case R.id.action_tag:
                 Intent tagIntent = new Intent(this, TagActivity.class);
-                String[] noteJSON = new String[notes.size()];
-
-                try {
-                    for (int i = 0; i < notes.size(); i++)
-                        noteJSON[i] = notes.get(i).toJSON().toString();
-
-                    tagIntent.putExtra(getString(R.string.param_notes), noteJSON);
-                    startActivity(tagIntent);
-                } catch(JSONException e) {
-                    e.printStackTrace();
-                    Log.e("SearchActivity", "Couldn't send note because of JSONException.");
-                }
-
+                startActivity(tagIntent);
                 break;
         }
 

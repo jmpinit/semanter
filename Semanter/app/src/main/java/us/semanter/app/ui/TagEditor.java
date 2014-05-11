@@ -13,23 +13,24 @@ import java.util.Vector;
 import us.semanter.app.model.Tag;
 
 public class TagEditor extends EditText {
-    List<TagListener> listeners;
+    private List<Listener> listeners;
 
     public TagEditor(Context context, AttributeSet attrs) {
         super(context, attrs);
 
-        listeners = new Vector<TagListener>();
+        listeners = new Vector<Listener>();
     }
 
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
         if(keyCode == KeyEvent.KEYCODE_ENTER) {
-            dispatchAll(allToTags());
+            dispatchNew(allToTags());
             setText("");
         } else if(keyCode == KeyEvent.KEYCODE_SPACE) {
+            // FIXME (never fires)
             Log.d("TagEditor", getSelectionStart() + ", " + getText().length());
             if(getSelectionStart() == getText().length() - 1) { // at end of field?
-                dispatchAll(allToTags());
+                dispatchNew(allToTags());
                 setText("");
             }
         }
@@ -38,6 +39,8 @@ public class TagEditor extends EditText {
     }
 
     private List<Tag> allToTags() {
+        // FIXME no whitespace tags
+
         String text = getText().toString();
 
         int numSpaces = countMatches(text, " ");
@@ -58,22 +61,23 @@ public class TagEditor extends EditText {
      * Event Source
      */
 
-    private void dispatch(Tag tag) {
+    private void dispatchNew(Tag tag) {
         Log.d("TagEditor", tag.getValue());
-        for(TagListener listener: listeners) {
+        for(Listener listener: listeners) {
             listener.onNewTag(tag);
         }
     }
 
-    private void dispatchAll(List<Tag> tags) {
-        for(Tag tag: tags) dispatch(tag);
+    private void dispatchNew(List<Tag> tags) {
+        for(Tag tag: tags)
+            dispatchNew(tag);
     }
 
-    public void registerListener(TagListener listener) {
+    public void registerListener(Listener listener) {
         listeners.add(listener);
     }
 
-    public interface TagListener {
+    public interface Listener {
         public void onNewTag(Tag newTag);
     }
 }

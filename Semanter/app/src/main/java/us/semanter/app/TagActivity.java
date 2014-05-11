@@ -1,6 +1,5 @@
 package us.semanter.app;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
@@ -8,46 +7,50 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ListView;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.List;
 
 import us.semanter.app.model.Note;
+import us.semanter.app.model.NoteFactory;
+import us.semanter.app.model.NoteModifier;
 import us.semanter.app.model.TagListAdapter;
 
 public class TagActivity extends ActionBarActivity {
     private ListView noteList;
     private TagListAdapter adapter;
 
-    private List<Note> notes;
+    private List<NoteModifier> noteModifiers;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tag);
 
-        Intent intent = getIntent();
-        String[] noteJSON = intent.getStringArrayExtra(getString(R.string.param_notes));
+        List<Note> notes = NoteFactory.getAllNotes(getExternalFilesDir(null).getPath() + "/notes");
 
-        try {
-            notes = new ArrayList<Note>(noteJSON.length);
-            for (String json : noteJSON)
-                notes.add(new Note(new JSONObject(json)));
-        } catch(JSONException e) {
-            e.printStackTrace();
-            Log.e("TagActivity", "Couldn't create note because of JSONException.");
-            finish();
-        }
-
+        noteModifiers = new ArrayList<NoteModifier>();
         for(Note note: notes)
-            Log.d("TagActivity", note.toString());
+            noteModifiers.add(new NoteModifier(note));
+
+        if(noteModifiers == null)
+            noteModifiers = new ArrayList<NoteModifier>();
+
+        Log.d("TagActivity", "There are " + noteModifiers.size() + " notes.");
+
+        adapter = new TagListAdapter(this, R.layout.row_tag, noteModifiers);
 
         noteList = (ListView)findViewById(R.id.tag_note_list);
-        adapter = new TagListAdapter(this, R.layout.row_tag, notes);
         noteList.setAdapter(adapter);
         adapter.notifyDataSetChanged();
+    }
+
+    private void saveNotes() {
+        // TODO only save if actually modified
+        for(NoteModifier modifier: noteModifiers) {
+            NoteFactory.saveMeta(this, modifier.getNote());
+            Log.d("TagActivity", "The tags to save are " + modifier.getNote().getTags().toString());
+        }
+        Log.d("TagActivity", "Saved notes.");
     }
 
     @Override
@@ -67,5 +70,23 @@ public class TagActivity extends ActionBarActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        saveNotes();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        saveNotes();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        saveNotes();
     }
 }

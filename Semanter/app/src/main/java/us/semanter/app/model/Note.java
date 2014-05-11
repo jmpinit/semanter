@@ -20,39 +20,51 @@ import us.semanter.app.vision.util.VisionResult;
  * Immutable in-memory representation of note
  */
 public class Note implements JSONable {
+    private final String name;
     private final Date date;
-    private final Set<Tag> tags;
+    private final Set<Tag>  tags;
     private Bundle results;
     private int resultCount;
 
-    public Note(Date date, Set<Tag> tags) {
+    // TODO constants for JSON fields
+
+    public Note(String name, Date date, Set<Tag> tags) {
+        this.name = name;
         this.date = new Date(date.getTime());
         this.tags = new HashSet<Tag>(tags);
         this.results = new Bundle();
         this.resultCount = 0;
     }
 
-    public Note(Date date, List<Tag> tags) {
+    public Note(String name, Date date, List<Tag> tags) {
+        this.name = name;
         this.date = new Date(date.getTime());
         this.tags = new HashSet<Tag>(tags);
         this.results = new Bundle();
         this.resultCount = 0;
     }
 
-    public Note(Date date) {
-        this(date, new HashSet<Tag>());
+    public Note(String name, Date date) {
+        this(name, date, new HashSet<Tag>());
     }
 
     public Note addTag(Tag tag) {
-        Note newNote = new Note(this.date, this.tags);
-        this.tags.add(tag);
+        Note newNote = new Note(this.name, this.date, this.tags);
+        newNote.tags.add(tag);
+        newNote.results = results;
+        return newNote;
+    }
+
+    public Note removeTag(Tag tag) {
+        Note newNote = new Note(this.name, this.date, this.tags);
+        newNote.tags.remove(tag);
         newNote.results = results;
         return newNote;
     }
 
     public Note addResult(VisionResult result) {
         try {
-            Note newNote = new Note(this.date, this.tags);
+            Note newNote = new Note(this.name, this.date, this.tags);
             newNote.results = results;
             newNote.results.putString(result.getTaskName(), result.toJSON().toString());
             newNote.resultCount = resultCount + 1;
@@ -69,6 +81,7 @@ public class Note implements JSONable {
         return resultCount;
     }
 
+    public String getName() { return name; }
     public Date getDate() {
         return new Date(date.getTime());
     }
@@ -93,7 +106,7 @@ public class Note implements JSONable {
      */
 
     public Note(JSONObject json) throws JSONException {
-        Note newNote = null;
+        String name = json.getString("name");
 
         Date date = new Date(json.getLong("date"));
         int resultCount = json.getInt("result_count");
@@ -111,6 +124,7 @@ public class Note implements JSONable {
             results.putString(taskName, resultsJSON.getString(taskName));
         }
 
+        this.name = name;
         this.date = date;
         this.resultCount = resultCount;
         this.tags = tags;
@@ -120,13 +134,18 @@ public class Note implements JSONable {
     @Override
     public JSONObject toJSON() throws JSONException {
         JSONObject json = new JSONObject();
+
+        json.put("name", name);
         json.put("date", date.getTime());
         json.put("result_count", resultCount);
 
         JSONObject tagJSON = new JSONObject();
         int i = 0;
-        for(Tag t: tags)
+        Log.d("Note", "writing tags.");
+        for(Tag t: tags) {
             tagJSON.put("" + i++, t.getValue());
+            Log.d("Note", t.toString());
+        }
 
         json.put("tags", tagJSON);
 

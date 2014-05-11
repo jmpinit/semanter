@@ -25,7 +25,7 @@
                 android:value="SearchActivity" />
         </activity>
         <activity
-            android:name="us.semanter.app.TagActivity"
+            android:name=".TagActivity"
             android:label="@string/title_activity_tag" >
         </activity>
 
