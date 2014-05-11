@@ -31,11 +31,11 @@ public class NoteGridAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        // create
         LayoutInflater inflater;
         inflater = LayoutInflater.from(mContext);
         ViewGroup thumbnailView = (ViewGroup) inflater.inflate(resource, null);
 
+        // create
         Note note = (Note)getItem(position);
 
         if(note != null) {
@@ -68,6 +68,8 @@ public class NoteGridAdapter extends BaseAdapter {
                     ((ViewSwitcher) thumbnailView.findViewById(R.id.thumbnail_note_switcher)).showNext();
                     break;
             }
+        } else {
+            thumbnailView.setVisibility(View.GONE);
         }
 
         return thumbnailView;

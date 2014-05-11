@@ -141,10 +141,8 @@ public class Note implements JSONable {
 
         JSONObject tagJSON = new JSONObject();
         int i = 0;
-        Log.d("Note", "writing tags.");
         for(Tag t: tags) {
             tagJSON.put("" + i++, t.getValue());
-            Log.d("Note", t.toString());
         }
 
         json.put("tags", tagJSON);

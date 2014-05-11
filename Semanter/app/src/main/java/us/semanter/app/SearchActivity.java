@@ -20,18 +20,24 @@ import android.widget.GridView;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import us.semanter.app.model.Note;
 import us.semanter.app.model.NoteFactory;
 import us.semanter.app.model.NoteGridAdapter;
+import us.semanter.app.model.Tag;
+import us.semanter.app.model.TagListener;
+import us.semanter.app.ui.TagView;
 import us.semanter.app.vision.VisionService;
 import us.semanter.app.vision.task.Normalizer;
 
 public class SearchActivity extends ActionBarActivity {
     private GridView noteList;
     private NoteGridAdapter noteGridAdapter;
+    private TagView tags;
 
     private List<Note> notes;
+    private List<Note> notesInList;
 
     private final IntentFilter visionFilter = new IntentFilter(VisionService.ACTION_UPDATE);
     private final BroadcastReceiver visionReceiver = new BroadcastReceiver() {
@@ -55,14 +61,22 @@ public class SearchActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
 
-        notes = NoteFactory.getAllNotes(getExternalFilesDir(null).getPath() + "/notes");
+        notesInList = new ArrayList<Note>();
 
-        if(notes == null)
-            notes = new ArrayList<Note>();
+        tags = (TagView)findViewById(R.id.search_tags);
+        tags.registerListener(new TagListener() {
+            @Override
+            public void onNewTag(Tag tag) { filterNotes(); }
+
+            @Override
+            public void onRemoveTag(Tag tag) { filterNotes(); }
+        });
 
         noteList = (GridView)findViewById(R.id.search_note_grid);
-        noteGridAdapter = new NoteGridAdapter(this, R.layout.thumbnail_note, notes);
+        noteGridAdapter = new NoteGridAdapter(this, R.layout.thumbnail_note, notesInList);
         noteList.setAdapter(noteGridAdapter);
+
+        loadNotes();
 
         final Intent reviewIntent = new Intent(this, ReviewActivity.class);
         final Context activityContext = this;
@@ -83,6 +97,46 @@ public class SearchActivity extends ActionBarActivity {
         registerReceiver(visionReceiver, visionFilter);
     }
 
+    private void filterNotes() {
+        Set<Tag> filterTags = tags.getTags();
+
+        for(Note note: notes) {
+            boolean visible = true;
+
+            Set<Tag> noteTags = note.getTags();
+            for(Tag tag: filterTags) {
+                if(!noteTags.contains(tag)) {
+                    visible = false;
+                    break;
+                }
+            }
+
+            if(visible) {
+                if(!notesInList.contains(note))
+                    notesInList.add(note);
+            } else {
+                notesInList.remove(note);
+            }
+        }
+
+        noteGridAdapter.notifyDataSetChanged();
+    }
+
+    private void loadNotes() {
+        // TODO only on change reload all notes
+        if(notes == null)
+            notes = new ArrayList<Note>();
+        else
+            notes.clear();
+
+        notes = NoteFactory.getAllNotes(getExternalFilesDir(null).getPath() + "/notes");
+
+        notesInList.clear();
+        notesInList.addAll(notes);
+        filterNotes();
+        Log.d("SearchActivity", "Loaded notes.");
+    }
+
     @Override
     public void onPause() {
         super.onPause();
@@ -90,6 +144,12 @@ public class SearchActivity extends ActionBarActivity {
         try {
             unregisterReceiver(visionReceiver);
         } catch(IllegalArgumentException e) {} // already unregistered
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        loadNotes();
     }
 
     @Override
@@ -102,9 +162,16 @@ public class SearchActivity extends ActionBarActivity {
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+        loadNotes();
+    }
+
+    @Override
     public void onRestart() {
         super.onRestart();
         registerReceiver(visionReceiver, visionFilter);
+        loadNotes();
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent imageReturnedIntent) {
@@ -159,7 +226,7 @@ public class SearchActivity extends ActionBarActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch(item.getItemId()) {
+        switch (item.getItemId()) {
             case R.id.action_import:
                 importPhoto();
                 break;
@@ -170,10 +237,5 @@ public class SearchActivity extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
     }
 }
