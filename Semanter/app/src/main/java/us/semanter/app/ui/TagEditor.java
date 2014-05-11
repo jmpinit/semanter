@@ -24,18 +24,21 @@ public class TagEditor extends EditText {
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
         if(keyCode == KeyEvent.KEYCODE_ENTER) {
-            dispatchNew(allToTags());
-            setText("");
+            tagify();
         } else if(keyCode == KeyEvent.KEYCODE_SPACE) {
             // FIXME (never fires)
             Log.d("TagEditor", getSelectionStart() + ", " + getText().length());
             if(getSelectionStart() == getText().length() - 1) { // at end of field?
-                dispatchNew(allToTags());
-                setText("");
+                tagify();
             }
         }
 
         return false;
+    }
+
+    public void tagify() {
+        dispatchNew(allToTags());
+        setText("");
     }
 
     private List<Tag> allToTags() {

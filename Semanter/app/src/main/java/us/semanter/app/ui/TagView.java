@@ -3,6 +3,7 @@ package us.semanter.app.ui;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -22,6 +23,7 @@ public class TagView extends LinearLayout implements TagEditor.Listener {
     private Context context;
     private LinearLayout tagLayout;
     private TagEditor editorView;
+    private Button addButton;
 
     private Set<Tag> tags;
     private Map<Tag, Button> tagButtons;
@@ -46,6 +48,13 @@ public class TagView extends LinearLayout implements TagEditor.Listener {
         tagLayout = (LinearLayout)findViewById(R.id.tag_selector_scroll_layout);
         editorView = (TagEditor)findViewById(R.id.tag_editor_text);
         editorView.registerListener(this);
+        addButton = (Button)findViewById(R.id.tag_add);
+        addButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                editorView.tagify();
+            }
+        });
 
         // Data
 
