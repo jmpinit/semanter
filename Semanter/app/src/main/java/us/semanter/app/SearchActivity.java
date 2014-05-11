@@ -18,19 +18,16 @@ import android.widget.AdapterView;
 import android.widget.GridView;
 
 import org.json.JSONException;
-import org.opencv.android.BaseLoaderCallback;
-import org.opencv.android.LoaderCallbackInterface;
-import org.opencv.android.OpenCVLoader;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import us.semanter.app.model.Note;
 import us.semanter.app.model.NoteFactory;
 import us.semanter.app.model.NoteGridAdapter;
 import us.semanter.app.vision.VisionService;
+import us.semanter.app.vision.task.Normalizer;
 
 public class SearchActivity extends ActionBarActivity {
     private GridView noteList;
@@ -38,12 +35,32 @@ public class SearchActivity extends ActionBarActivity {
 
     private List<Note> notes;
 
+    private final IntentFilter visionFilter = new IntentFilter(VisionService.ACTION_UPDATE);
+    private final BroadcastReceiver visionReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d("SearchActivity", "I see an update of " + intent.getStringExtra(VisionService.EXTRA_SOURCE));
+
+            // FIXME testing
+            String taskName = intent.getStringExtra(VisionService.EXTRA_PIPE_NAME);
+            if(taskName.equals(Normalizer.TASK_NAME)) {
+                Intent imgIntent = new Intent();
+                imgIntent.setAction(Intent.ACTION_VIEW);
+                imgIntent.setDataAndType(Uri.parse("file://" + NoteFactory.getSourcePath(intent.getStringExtra(VisionService.EXTRA_SOURCE))), "image/*");
+                startActivity(imgIntent);
+            }
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
 
-        notes = new ArrayList<Note>();
+        notes = NoteFactory.getAllNotes(getExternalFilesDir(null).getPath() + "/notes");
+
+        if(notes == null)
+            notes = new ArrayList<Note>();
 
         noteList = (GridView)findViewById(R.id.search_note_grid);
         noteGridAdapter = new NoteGridAdapter(this, R.layout.thumbnail_note, notes);
@@ -65,18 +82,31 @@ public class SearchActivity extends ActionBarActivity {
         });
 
         startService(new Intent(this, VisionService.class));
+        registerReceiver(visionReceiver, visionFilter);
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
+    public void onPause() {
+        super.onPause();
 
-        registerReceiver(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                Log.d("SearchActivity", "I see an update of " + intent.getStringExtra(VisionService.EXTRA_SOURCE));
-            }
-        }, new IntentFilter(VisionService.ACTION_UPDATE));
+        try {
+            unregisterReceiver(visionReceiver);
+        } catch(IllegalArgumentException e) {} // already unregistered
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        try {
+            unregisterReceiver(visionReceiver);
+        } catch(IllegalArgumentException e) {} // already unregistered
+    }
+
+    @Override
+    public void onRestart() {
+        super.onRestart();
+        registerReceiver(visionReceiver, visionFilter);
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent imageReturnedIntent) {
@@ -109,9 +139,7 @@ public class SearchActivity extends ActionBarActivity {
         // create note out of image
         try {
             String noteSourcePath = NoteFactory.createNewNote(this, filePath).toString();
-
-            // TODO use EXIF for date
-            Note newNote = new Note(new Date());
+            Note newNote = NoteFactory.noteFromPath(noteSourcePath);
 
             notes.add(newNote);
             noteGridAdapter.notifyDataSetChanged();
@@ -162,22 +190,5 @@ public class SearchActivity extends ActionBarActivity {
     @Override
     public void onResume() {
         super.onResume();
-        OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_2_4_6, this, mLoaderCallback);
     }
-
-    private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
-        @Override
-        public void onManagerConnected(int status) {
-            switch (status) {
-                case LoaderCallbackInterface.SUCCESS:
-                {
-                    Log.i("SearchActivity", "OpenCV loaded successfully");
-                } break;
-                default:
-                {
-                    super.onManagerConnected(status);
-                } break;
-            }
-        }
-    };
 }

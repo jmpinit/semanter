@@ -1,6 +1,7 @@
 package us.semanter.app.vision;
 
 import android.graphics.Bitmap;
+import android.util.Log;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -49,22 +50,24 @@ public abstract class TaskNode {
     public abstract void operateOn(String sourcePath);
 
     protected void dispatch(String outputPath) {
-        dispatchEvents(NoteFactory.getNotePath(outputPath));
+        dispatchEvents(getTaskName(), NoteFactory.getNotePath(outputPath));
         dispatchTasks(outputPath);
     }
 
     /**
      * @param notePath the directory of the note that was updated.
      */
-    private void dispatchEvents(String notePath) {
-        for(NodeListener listener: listeners)
-            listener.onTaskCompleted(notePath);
+    private void dispatchEvents(String taskName, String notePath) {
+        for(NodeListener listener: listeners) {
+            listener.onTaskCompleted(taskName, notePath);
+        }
     }
 
     /**
      * @param outputPath the path of the image output of this node's operation.
      */
     private void dispatchTasks(String outputPath) {
+        Log.d("TaskNode", "Dispatching tasks.");
         for(TaskNode child: children)
             child.operateOn(outputPath);
     }
@@ -80,6 +83,7 @@ public abstract class TaskNode {
     // note on immutability: listeners are not used for anything.
     // information flows only from a node to a listener, so they should be safe for immutability
     public void registerListenerForAll(NodeListener listener) {
+        registerListener(listener);
         for(TaskNode child: children)
             child.registerListenerForAll(listener);
     }
@@ -135,6 +139,6 @@ public abstract class TaskNode {
         /**
          * @param changePath the filesystem location of the note that was updated
          */
-        public void onTaskCompleted(String changePath);
+        public void onTaskCompleted(String taskName, String changePath);
     }
 }

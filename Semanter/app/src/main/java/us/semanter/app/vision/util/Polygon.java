@@ -55,6 +55,21 @@ public class Polygon implements JSONable {
         return biggest;
     }
 
+    public double lengthOfLongestSide() {
+        double max = 0;
+        for(int i=0; i < points.size(); i++) {
+            Point pt1 = points.get(i);
+            Point pt2 = points.get((i+1)%points.size());
+
+            double distance = Math.sqrt(Math.pow(pt1.x - pt2.x, 2) + Math.pow(pt1.y - pt2.y, 2));
+
+            if(distance > max)
+                max = distance;
+        }
+
+        return max;
+    }
+
     public Polygon(JSONObject json) {
         try {
             points = new ArrayList<Point>();

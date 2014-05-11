@@ -5,6 +5,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
+import org.opencv.android.BaseLoaderCallback;
+import org.opencv.android.LoaderCallbackInterface;
+import org.opencv.android.OpenCVLoader;
+
 import java.util.Arrays;
 
 import us.semanter.app.vision.task.Flattener;
@@ -21,31 +25,15 @@ public class VisionService extends IntentService {
 
     public static final String EXTRA_SOURCE = "us.semanter.app.vision.extra.PHOTO";
     private static final String EXTRA_NOTE = "us.semanter.app.vision.extra.NOTE";
-    private static final String EXTRA_PIPE_NAME = "us.semanter.app.vision.extra.PIPE_NAME";
+    public static final String EXTRA_PIPE_NAME = "us.semanter.app.vision.extra.PIPE_NAME";
     private static final String EXTRA_ALTERNATIVE = "us.semanter.app.vision.extra.ALTERNATIVE";
 
     private TaskNode rootOperation;
+    private boolean cvReady;
 
     public VisionService() {
         super("VisionService");
-
-        // construct the initial operation tree carried out by the service.
-        TaskNode normalize = new Normalizer();
-        TaskNode flatten = new Flattener(Arrays.asList(new TaskNode[] {normalize}));
-
-        rootOperation = flatten;
-
-        rootOperation.registerListenerForAll(new TaskNode.NodeListener() {
-            @Override
-            public void onTaskCompleted(String changePath) {
-                Log.d("VisionService", "Finished modifying " + changePath + " succesfully.");
-
-                Intent changeNotification = new Intent();
-                changeNotification.setAction(ACTION_UPDATE);
-                changeNotification.putExtra(EXTRA_SOURCE, changePath);
-                sendBroadcast(changeNotification);
-            }
-        });
+        cvReady = false;
     }
 
     /**
@@ -75,7 +63,7 @@ public class VisionService extends IntentService {
     protected void onHandleIntent(Intent intent) {
         if (intent != null) {
             final String action = intent.getAction();
-            Log.d("VisionService", "" + action);
+            Log.d("VisionService", "action is " + action);
             if (ACTION_IMPORT.equals(action)) {
                 final String sourcePath = intent.getStringExtra(EXTRA_SOURCE);
                 handleActionImport(sourcePath);
@@ -89,6 +77,8 @@ public class VisionService extends IntentService {
     }
 
     private void handleActionImport(final String sourcePath) {
+        while(!cvReady) {}
+        Log.d("VisionService", "Importing " + sourcePath);
         rootOperation.operateOn(sourcePath);
     }
 
@@ -97,7 +87,51 @@ public class VisionService extends IntentService {
     }
 
     @Override
+    public void onCreate() {
+        super.onCreate();
+
+        OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_2_4_6, this, openCVLoaderCallback);
+    }
+
+    @Override
     public void onDestroy() {
         Log.d("VisionService", "onDestroy()");
     }
+
+    private BaseLoaderCallback openCVLoaderCallback = new BaseLoaderCallback(this) {
+        @Override
+        public void onManagerConnected(int status) {
+            switch (status) {
+                case LoaderCallbackInterface.SUCCESS:
+                {
+                    Log.i("VisionService", "OpenCV loaded successfully");
+
+                    // construct the initial operation tree carried out by the service.
+                    TaskNode normalize = new Normalizer();
+                    TaskNode flatten = new Flattener(Arrays.asList(new TaskNode[] {normalize}));
+
+                    rootOperation = flatten;
+
+                    rootOperation.registerListenerForAll(new TaskNode.NodeListener() {
+                        @Override
+                        public void onTaskCompleted(String taskName, String changePath) {
+                            Log.d("VisionService", "Finished modifying " + changePath + " successfully.");
+
+                            Intent changeNotification = new Intent();
+                            changeNotification.setAction(ACTION_UPDATE);
+                            changeNotification.putExtra(EXTRA_SOURCE, changePath);
+                            changeNotification.putExtra(EXTRA_PIPE_NAME, taskName);
+                            sendBroadcast(changeNotification);
+                        }
+                    });
+
+                    cvReady = true;
+                } break;
+                default:
+                {
+                    super.onManagerConnected(status);
+                } break;
+            }
+        }
+    };
 }

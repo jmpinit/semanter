@@ -67,11 +67,10 @@ public class Flattener extends TaskNode {
             // get largest and assume it is the notes
             Polygon notePage = Polygon.largest(squares);
 
-            Log.d("Flattener", notePage.toString());
-
             // calculate deskew transform
-            final double paperWidth = 8.5 * 50;
-            final double paperHeight = 11 * 50;
+            final double scale = notePage.lengthOfLongestSide();
+            final double paperWidth = (8.5 / 11.0) * scale;
+            final double paperHeight = scale;
 
             Mat sourcePerspective = notePage.toMatOfPoint2f();
             Mat destinationPerspective = new MatOfPoint2f(

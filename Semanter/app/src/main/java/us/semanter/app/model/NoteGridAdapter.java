@@ -31,43 +31,43 @@ public class NoteGridAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        ViewGroup thumbnailView;
-
-        Note note = (Note)getItem(position);
-
         // create
         LayoutInflater inflater;
         inflater = LayoutInflater.from(mContext);
-        thumbnailView = (ViewGroup)inflater.inflate(resource, null);
+        ViewGroup thumbnailView = (ViewGroup) inflater.inflate(resource, null);
 
-        // adjust for GridView
-        thumbnailView.setLayoutParams(new GridView.LayoutParams(85, 85));
-        thumbnailView.setPadding(8, 8, 8, 8);
+        Note note = (Note)getItem(position);
 
-        // add data
-        // TODO short date formatting
-        DateFormat dateFormat = new SimpleDateFormat("E");
+        if(note != null) {
+            // adjust for GridView
+            thumbnailView.setLayoutParams(new GridView.LayoutParams(85, 85));
+            thumbnailView.setPadding(8, 8, 8, 8);
 
-        ((TextView)thumbnailView.findViewById(R.id.thumbnail_note_date)).setText(dateFormat.format(note.getDate()));
+            // add data
+            // TODO short date formatting
+            DateFormat dateFormat = new SimpleDateFormat("E");
 
-        // TODO task numbers as enum
-        ImageView progressImage = (ImageView)thumbnailView.findViewById(R.id.thumbnail_note_progress);
-        switch(note.getResultCount()) {
-            case 0:
-                progressImage.setImageResource(R.drawable.ic_progress_1);
-                break;
-            case 1:
-                progressImage.setImageResource(R.drawable.ic_progress_2);
-                break;
-            case 2:
-                progressImage.setImageResource(R.drawable.ic_progress_3);
-                break;
-            case 3:
-                progressImage.setImageResource(R.drawable.ic_progress_4);
-                break;
-            case 4:
-                ((ViewSwitcher)thumbnailView.findViewById(R.id.thumbnail_note_switcher)).showNext();
-                break;
+            ((TextView) thumbnailView.findViewById(R.id.thumbnail_note_date)).setText(dateFormat.format(note.getDate()));
+
+            // TODO task numbers as enum
+            ImageView progressImage = (ImageView) thumbnailView.findViewById(R.id.thumbnail_note_progress);
+            switch (note.getResultCount()) {
+                case 0:
+                    progressImage.setImageResource(R.drawable.ic_progress_1);
+                    break;
+                case 1:
+                    progressImage.setImageResource(R.drawable.ic_progress_2);
+                    break;
+                case 2:
+                    progressImage.setImageResource(R.drawable.ic_progress_3);
+                    break;
+                case 3:
+                    progressImage.setImageResource(R.drawable.ic_progress_4);
+                    break;
+                case 4:
+                    ((ViewSwitcher) thumbnailView.findViewById(R.id.thumbnail_note_switcher)).showNext();
+                    break;
+            }
         }
 
         return thumbnailView;
