@@ -20,6 +20,7 @@ public class Note implements JSONable {
     public final static String FIELD_NAME = "name";
     public final static String FIELD_DATE = "date";
     public final static String FIELD_THUMBNAIL = "thumbnail";
+    public final static String FIELD_LAST = "last";
     public final static String FIELD_TAGS = "tags";
     public final static String FIELD_RESULT = "result";
 
@@ -29,6 +30,7 @@ public class Note implements JSONable {
     private final String name;
     private final Date date;
     private File thumbnail;
+    private File last;
     private final Set<Tag>  tags;
     private Result result;
 
@@ -38,6 +40,7 @@ public class Note implements JSONable {
         this.name = name;
         this.date = new Date(date.getTime());
         this.thumbnail = null;
+        this.last = null;
         this.tags = new HashSet<Tag>(tags);
         this.result = null;
     }
@@ -46,6 +49,7 @@ public class Note implements JSONable {
         this.name = name;
         this.date = new Date(date.getTime());
         this.thumbnail = null;
+        this.last = null;
         this.tags = new HashSet<Tag>(tags);
         this.result = null;
     }
@@ -57,6 +61,15 @@ public class Note implements JSONable {
     public Note setThumbnail(File thumbnail) {
         Note newNote = new Note(this.name, this.date, this.tags);
         newNote.thumbnail = thumbnail;
+        newNote.last = last;
+        newNote.result = result;
+        return newNote;
+    }
+
+    public Note setLast(File last) {
+        Note newNote = new Note(this.name, this.date, this.tags);
+        newNote.thumbnail = thumbnail;
+        newNote.last = last;
         newNote.result = result;
         return newNote;
     }
@@ -65,6 +78,7 @@ public class Note implements JSONable {
         Note newNote = new Note(this.name, this.date, this.tags);
         newNote.tags.add(tag);
         newNote.thumbnail = thumbnail;
+        newNote.last = last;
         newNote.result = result;
         return newNote;
     }
@@ -73,6 +87,7 @@ public class Note implements JSONable {
         Note newNote = new Note(this.name, this.date, this.tags);
         newNote.tags.remove(tag);
         newNote.thumbnail = thumbnail;
+        newNote.last = last;
         newNote.result = result;
         return newNote;
     }
@@ -80,6 +95,7 @@ public class Note implements JSONable {
     public Note addResult(String parentName, Result res) {
         Note newNote = new Note(this.name, this.date, this.tags);
         newNote.thumbnail = thumbnail;
+        newNote.last = last;
 
         if(result == null)
             newNote.result = res;
@@ -90,7 +106,10 @@ public class Note implements JSONable {
     }
 
     public Result getResult(String parentID, String taskName) {
-        return result.get(parentID, taskName);
+        if(result == null)
+            return null;
+        else
+            return result.get(parentID, taskName);
     }
 
     public String getName() { return name; }
@@ -98,6 +117,7 @@ public class Note implements JSONable {
         return new Date(date.getTime());
     }
     public File getThumbnail() { return thumbnail; }
+    public File getLast() { return last; }
 
     public Set<Tag> getTags() {
         return new HashSet<Tag>(tags);
@@ -223,6 +243,13 @@ public class Note implements JSONable {
         else
             thumbnail = new File(thumbnailPath);
 
+        String lastPath = json.getString(FIELD_LAST);
+        File last;
+        if(lastPath.equals(""))
+            last = null;
+        else
+            last = new File(lastPath);
+
         Set<Tag> tags = new HashSet<Tag>();
         JSONObject tagJSON = json.getJSONObject(FIELD_TAGS);
         for(int i=0; tagJSON.has(""+i); i++)
@@ -239,6 +266,7 @@ public class Note implements JSONable {
         this.name = name;
         this.date = date;
         this.thumbnail = thumbnail;
+        this.last = last;
         this.tags = tags;
         this.result = result;
     }
@@ -253,6 +281,11 @@ public class Note implements JSONable {
             json.put(FIELD_THUMBNAIL, "");
         else
             json.put(FIELD_THUMBNAIL, thumbnail.getPath());
+
+        if(last == null)
+            json.put(FIELD_LAST, "");
+        else
+            json.put(FIELD_LAST, last.getPath());
 
         JSONObject tagJSON = new JSONObject();
         int i = 0;

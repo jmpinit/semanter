@@ -26,7 +26,7 @@ public class VisionService extends IntentService {
     public static final String ACTION_UPDATE = "us.semanter.app.vision.action.UPDATE";
     public static final String ACTION_THUMBNAIL = "us.semanter.app.vision.action.THUMBNAIL";
 
-    public static final String EXTRA_SOURCE = "us.semanter.app.vision.extra.PHOTO";
+    public static final String EXTRA_CHANGE_PATH = "us.semanter.app.vision.extra.PHOTO";
     public static final String EXTRA_THUMBNAIL = "us.semanter.app.vision.extra.THUMBNAIL";
     public static final String EXTRA_NOTE_NAME = "us.semanter.app.vision.extra.NOTE_NAME";
     public static final String EXTRA_PIPE_NAME = "us.semanter.app.vision.extra.PIPE_NAME";
@@ -47,7 +47,7 @@ public class VisionService extends IntentService {
     public static void startActionImport(Context context, String sourcePath) {
         Intent intent = new Intent(context, VisionService.class);
         intent.setAction(ACTION_IMPORT);
-        intent.putExtra(EXTRA_SOURCE, sourcePath);
+        intent.putExtra(EXTRA_CHANGE_PATH, sourcePath);
         context.startService(intent);
     }
 
@@ -57,7 +57,7 @@ public class VisionService extends IntentService {
     public static void startActionCorrect(Context context, String sourcePath, String pipeID, String alternative) {
         Intent intent = new Intent(context, VisionService.class);
         intent.setAction(ACTION_CORRECT);
-        intent.putExtra(EXTRA_SOURCE, sourcePath);
+        intent.putExtra(EXTRA_CHANGE_PATH, sourcePath);
         intent.putExtra(EXTRA_PIPE_NAME, pipeID);
         intent.putExtra(EXTRA_ALTERNATIVE, alternative);
         context.startService(intent);
@@ -69,10 +69,10 @@ public class VisionService extends IntentService {
             final String action = intent.getAction();
             Log.d("VisionService", "action is " + action);
             if (ACTION_IMPORT.equals(action)) {
-                final String sourcePath = intent.getStringExtra(EXTRA_SOURCE);
+                final String sourcePath = intent.getStringExtra(EXTRA_CHANGE_PATH);
                 handleActionImport(sourcePath);
             } else if (ACTION_CORRECT.equals(action)) {
-                final String sourcePath = intent.getStringExtra(EXTRA_SOURCE);
+                final String sourcePath = intent.getStringExtra(EXTRA_CHANGE_PATH);
                 final String pipeName = intent.getStringExtra(EXTRA_PIPE_NAME);
                 final String alternative = intent.getStringExtra(EXTRA_ALTERNATIVE);
                 handleActionCorrect(sourcePath, pipeName, alternative);
@@ -134,8 +134,9 @@ public class VisionService extends IntentService {
 
                             Intent changeNotification = new Intent();
                             changeNotification.setAction(ACTION_UPDATE);
-                            changeNotification.putExtra(EXTRA_SOURCE, changePath);
+                            changeNotification.putExtra(EXTRA_CHANGE_PATH, changePath);
                             changeNotification.putExtra(EXTRA_PIPE_NAME, taskName);
+                            changeNotification.putExtra(EXTRA_NOTE_NAME, NoteFactory.getNoteName(getApplicationContext(), new File(changePath)));
                             sendBroadcast(changeNotification);
                         }
                     };

@@ -11,7 +11,6 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 
 import us.semanter.app.model.Note;
-import us.semanter.app.model.NoteFactory;
 import us.semanter.app.ui.VisionView;
 
 public class NoteView extends VisionView {
@@ -46,8 +45,7 @@ public class NoteView extends VisionView {
 
         this.note = note;
 
-        String sourcePath = NoteFactory.getPathToResource(getContext(), note.getName(), NoteFactory.FILE_SOURCE);
-        noteImage = BitmapFactory.decodeFile(sourcePath);
+        noteImage = BitmapFactory.decodeFile(note.getLast().getPath());
     }
 
     @Override

@@ -83,8 +83,25 @@ public class SearchActivity extends ActionBarActivity {
             public void onReceive(Context context, Intent intent) {
                 Log.d("SearchActivity", "I see " + intent.getAction());
                 if(intent.getAction().equals(VisionService.ACTION_UPDATE)) {
-                    Log.d("SearchActivity", "I see an update of " + intent.getStringExtra(VisionService.EXTRA_SOURCE));
-                    loadNotes();
+                    String noteName = intent.getStringExtra(VisionService.EXTRA_NOTE_NAME);
+                    String changePath = intent.getStringExtra(VisionService.EXTRA_CHANGE_PATH);
+
+                    Log.d("SearchActivity", "Updating " + changePath);
+
+                    // find the right note
+                    Note noteToUpdate = null;
+                    for(Note note: notes) {
+                        if(note.getName().equals(noteName)) {
+                            noteToUpdate = note;
+                            break;
+                        }
+                    }
+
+                    if(noteToUpdate != null) {
+                        NoteFactory.saveMeta(ctx, noteToUpdate.setLast(new File(changePath)));
+                        loadNotes();
+                        Log.d("SearchActivity", "updated last for " + noteToUpdate.getName() + " to " + changePath);
+                    }
                 } else if(intent.getAction().equals(VisionService.ACTION_THUMBNAIL)) {
                     String thumbnailPath = intent.getStringExtra(VisionService.EXTRA_THUMBNAIL);
                     String noteName = intent.getStringExtra(VisionService.EXTRA_NOTE_NAME);
@@ -100,9 +117,8 @@ public class SearchActivity extends ActionBarActivity {
 
                     if(noteToUpdate != null) {
                         notes.remove(noteToUpdate);
-                        Note noteWithThumbnail = noteToUpdate.setThumbnail(new File(thumbnailPath));
-                        NoteFactory.saveMeta(ctx, noteWithThumbnail);
-                        notes.add(noteWithThumbnail);
+                        NoteFactory.saveMeta(ctx, noteToUpdate.setThumbnail(new File(thumbnailPath)));
+                        loadNotes();
                         noteGridAdapter.notifyDataSetChanged();
                         Log.d("SearchActivity", "updated thumbnail for " + noteToUpdate.getName());
                     }
