@@ -9,6 +9,9 @@ import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 
+import java.io.File;
+
+import us.semanter.app.model.NoteFactory;
 import us.semanter.app.vision.task.Flattener;
 import us.semanter.app.vision.task.Normalizer;
 import us.semanter.app.vision.task.Thumbnailer;
@@ -21,9 +24,11 @@ public class VisionService extends IntentService {
     private static final String ACTION_CORRECT = "us.semanter.app.vision.action.CORRECT";
 
     public static final String ACTION_UPDATE = "us.semanter.app.vision.action.UPDATE";
+    public static final String ACTION_THUMBNAIL = "us.semanter.app.vision.action.THUMBNAIL";
 
     public static final String EXTRA_SOURCE = "us.semanter.app.vision.extra.PHOTO";
-    private static final String EXTRA_NOTE = "us.semanter.app.vision.extra.NOTE";
+    public static final String EXTRA_THUMBNAIL = "us.semanter.app.vision.extra.THUMBNAIL";
+    public static final String EXTRA_NOTE_NAME = "us.semanter.app.vision.extra.NOTE_NAME";
     public static final String EXTRA_PIPE_NAME = "us.semanter.app.vision.extra.PIPE_NAME";
     private static final String EXTRA_ALTERNATIVE = "us.semanter.app.vision.extra.ALTERNATIVE";
 
@@ -122,7 +127,7 @@ public class VisionService extends IntentService {
 
                     rootOperation = flatten;
 
-                    rootOperation.registerListenerForAll(new TaskNode.NodeListener() {
+                    TaskNode.NodeListener changeListener = new TaskNode.NodeListener() {
                         @Override
                         public void onTaskCompleted(String taskName, String changePath) {
                             Log.d("VisionService", "Finished modifying " + changePath + " successfully.");
@@ -133,7 +138,25 @@ public class VisionService extends IntentService {
                             changeNotification.putExtra(EXTRA_PIPE_NAME, taskName);
                             sendBroadcast(changeNotification);
                         }
-                    });
+                    };
+
+                    flatten.registerListener(changeListener);
+                    normalize.registerListener(changeListener);
+
+                    TaskNode.NodeListener thumbnailListener = new TaskNode.NodeListener() {
+                        @Override
+                        public void onTaskCompleted(String taskName, String changePath) {
+                            Log.d("VisionService", "Sending thumbnail " + changePath);
+                            Intent changeNotification = new Intent();
+                            changeNotification.setAction(ACTION_THUMBNAIL);
+                            changeNotification.putExtra(EXTRA_THUMBNAIL, changePath);
+                            changeNotification.putExtra(EXTRA_NOTE_NAME, NoteFactory.getNoteName(getApplicationContext(), new File(changePath)));
+                            sendBroadcast(changeNotification);
+                        }
+                    };
+
+                    flattenThumbnail.registerListener(thumbnailListener);
+                    normalizeThumbnail.registerListener(thumbnailListener);
 
                     cvReady = true;
                 } break;

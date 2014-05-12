@@ -70,9 +70,8 @@ public class Normalizer extends TaskNode {
         Photo.fastNlMeansDenoisingColored(masked, masked);*/
 
         // save result
-        saveResult(new File(sourcePath), parentID, normalized);
-
-        dispatch(sourcePath);
+        File resultFile = saveResult(new File(sourcePath), parentID, normalized);
+        dispatch(resultFile.getPath());
     }
 
     public String getTaskName() {

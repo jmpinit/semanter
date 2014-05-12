@@ -1,6 +1,7 @@
 package us.semanter.app.model;
 
 import android.content.Context;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,6 +10,7 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -49,24 +51,14 @@ public class NoteGridAdapter extends BaseAdapter {
             ((TextView) thumbnailView.findViewById(R.id.thumbnail_note_date)).setText(dateFormat.format(note.getDate()));
 
             // TODO task numbers as enum
-            ImageView progressImage = (ImageView) thumbnailView.findViewById(R.id.thumbnail_note_progress);
-            /*switch (note.getResultCount()) {
-                case 0:
-                    progressImage.setImageResource(R.drawable.ic_progress_1);
-                    break;
-                case 1:
-                    progressImage.setImageResource(R.drawable.ic_progress_2);
-                    break;
-                case 2:
-                    progressImage.setImageResource(R.drawable.ic_progress_3);
-                    break;
-                case 3:
-                    progressImage.setImageResource(R.drawable.ic_progress_4);
-                    break;
-                case 4:
-                    ((ViewSwitcher) thumbnailView.findViewById(R.id.thumbnail_note_switcher)).showNext();
-                    break;
-            }*/
+            ImageView thumbnailImage = (ImageView) thumbnailView.findViewById(R.id.thumbnail_note_image);
+
+            File thumbnail = note.getThumbnail();
+            if (thumbnail == null) {
+                thumbnailImage.setImageResource(R.drawable.ic_progress_1);
+            } else {
+                thumbnailImage.setImageURI(Uri.parse(thumbnail.getPath()));
+            }
         } else {
             thumbnailView.setVisibility(View.GONE);
         }

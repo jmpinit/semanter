@@ -17,6 +17,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +39,11 @@ public class SearchActivity extends ActionBarActivity {
     private List<Note> notes;
     private List<Note> notesInList;
 
-    private final IntentFilter visionFilter = new IntentFilter(VisionService.ACTION_UPDATE);
+    private final IntentFilter visionFilter = new IntentFilter();
+    {
+        visionFilter.addAction(VisionService.ACTION_UPDATE);
+        visionFilter.addAction(VisionService.ACTION_THUMBNAIL);
+    }
     private BroadcastReceiver visionReceiver;
 
     @Override
@@ -63,13 +68,12 @@ public class SearchActivity extends ActionBarActivity {
 
         loadNotes();
 
-        final Intent reviewIntent = new Intent(this, ReviewActivity.class);
         final Context ctx = this;
         noteList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-                String notePath = reviewIntent.getStringExtra(VisionService.EXTRA_SOURCE);
                 Intent reviewIntent = new Intent(ctx, ReviewActivity.class);
-                reviewIntent.putExtra("note", notePath);
+                Note note = (Note)noteGridAdapter.getItem(position);
+                reviewIntent.putExtra("note", note.getName());
                 startActivity(reviewIntent);
             }
         });
@@ -77,8 +81,32 @@ public class SearchActivity extends ActionBarActivity {
         visionReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                Log.d("SearchActivity", "I see an update of " + intent.getStringExtra(VisionService.EXTRA_SOURCE));
-                loadNotes();
+                Log.d("SearchActivity", "I see " + intent.getAction());
+                if(intent.getAction().equals(VisionService.ACTION_UPDATE)) {
+                    Log.d("SearchActivity", "I see an update of " + intent.getStringExtra(VisionService.EXTRA_SOURCE));
+                    loadNotes();
+                } else if(intent.getAction().equals(VisionService.ACTION_THUMBNAIL)) {
+                    String thumbnailPath = intent.getStringExtra(VisionService.EXTRA_THUMBNAIL);
+                    String noteName = intent.getStringExtra(VisionService.EXTRA_NOTE_NAME);
+
+                    // find the right note
+                    Note noteToUpdate = null;
+                    for(Note note: notes) {
+                        if(note.getName().equals(noteName)) {
+                            noteToUpdate = note;
+                            break;
+                        }
+                    }
+
+                    if(noteToUpdate != null) {
+                        notes.remove(noteToUpdate);
+                        Note noteWithThumbnail = noteToUpdate.setThumbnail(new File(thumbnailPath));
+                        NoteFactory.saveMeta(ctx, noteWithThumbnail);
+                        notes.add(noteWithThumbnail);
+                        noteGridAdapter.notifyDataSetChanged();
+                        Log.d("SearchActivity", "updated thumbnail for " + noteToUpdate.getName());
+                    }
+                }
             }
         };
 

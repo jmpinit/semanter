@@ -62,9 +62,10 @@ public class Flattener extends TaskNode {
         // find paper
         List<Polygon> squares = findSquares(source);
 
+        File resultFile;
         if(squares.size() == 0) {
             // make no change
-            saveResult(new File(sourcePath), parentID, source);
+            resultFile = saveResult(new File(sourcePath), parentID, source);
         } else {
             // get largest and assume it is the notes
             Polygon notePage = Polygon.largest(squares);
@@ -93,10 +94,10 @@ public class Flattener extends TaskNode {
             Mat croppedRef = new Mat(flattened, noteRegion);
 
             // save result
-            saveResult(new File(sourcePath), parentID, croppedRef);
+            resultFile = saveResult(new File(sourcePath), parentID, croppedRef);
         }
 
-        dispatch(getResultPath(sourcePath).toString());
+        dispatch(resultFile.toString());
     }
 
     private List<Polygon> findSquares(Mat image) {

@@ -31,21 +31,24 @@ public class NoteFactory {
     // TODO validate note directories and content (checkrep)
 
     /**
-     * @param sourcePath image filepath
-     * @return filepath of note folder (assumed to be parent directory of image)
-     */
-    public static String getNotePath(String sourcePath) {
-        return new File(sourcePath).getParent();
-    }
-
-    /**
      * @param ctx context to use to get storage directory
      * @param noteName name of note (like from note.getName())
      * @param resource resource to obtain the path to
      * @return path to the specified resource
      */
     public static String getPathToResource(Context ctx, String noteName, String resource) {
-        return new File(getNoteDir(ctx, noteName) + "/" + noteName + "-" + resource).toString();
+        return new File(nameToDir(ctx, noteName) + "/" + noteName + "-" + resource).toString();
+    }
+
+    public static File nameToDir(Context ctx, String noteName) {
+        return new File(getNotesDir(ctx) + "/" + noteName);
+    }
+
+    public static String getNoteName(Context ctx, File resFile) {
+        if(resFile.isDirectory())
+            return resFile.getName();
+        else
+            return new File(resFile.getParent()).getName();
     }
 
     /**
@@ -148,8 +151,8 @@ public class NoteFactory {
         return notes;
     }
 
-    public static File getNoteDir(Context ctx, String noteName) {
-        return new File(getNotesDir(ctx) + "/" + noteName);
+    public static File getNoteDir(Context ctx, File resPath) {
+        return new File(getNotesDir(ctx) + "/" + getNoteName(ctx, resPath));
     }
 
     public static File getNotesDir(Context ctx) {
@@ -166,11 +169,11 @@ public class NoteFactory {
     }
 
     public static void saveMeta(Context ctx, Note note) {
-        File noteFile = new File(getNoteDir(ctx, note.getName()) + "/" + note.getName() + "-" + FILE_META_DATA);
+        File noteFile = new File(getNoteDir(ctx, nameToDir(ctx, note.getName())) + "/" + note.getName() + "-" + FILE_META_DATA);
 
         try {
             PrintWriter noteWriter = new PrintWriter(noteFile, "UTF-8");
-            noteWriter.print(note.toJSON().toString());
+            noteWriter.print(note.toJSON().toString(4));
             noteWriter.close();
         } catch(JSONException e) {
             ExceptionUtility.printException(NoteFactory.class, e, "Couldn't write initial note meta file to " + noteFile + " because of JSONException.");

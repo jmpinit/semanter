@@ -82,7 +82,7 @@ public abstract class TaskNode {
      */
     public abstract void operateOn(String parentID, String sourcePath);
 
-    public void saveResult(File source, String parentID, Mat result) {
+    public File saveResult(File source, String parentID, Mat result) {
         File resultPath = getResultPath(source.toString());
         VisionUtil.saveMat(result, bmpConfig, resultPath.getPath());
 
@@ -91,11 +91,13 @@ public abstract class TaskNode {
         Note note = NoteFactory.noteFromPath(source.getPath());
         Note moddedNote = note.addResult(parentID, new Note.Result(getUID(), getTaskName(), resultPath, null));
         NoteFactory.saveMeta(context, moddedNote);
+
+        return resultPath;
     }
 
     protected void dispatch(String outputPath) {
         used = true;
-        dispatchEvents(getTaskName(), NoteFactory.getNotePath(outputPath));
+        dispatchEvents(getTaskName(), outputPath);
         dispatchTasks(outputPath);
     }
 
@@ -143,7 +145,7 @@ public abstract class TaskNode {
     // on the structure of the tree.
     private String generateUID() {
         byte[] hashData = ByteBuffer.allocate(4).putInt(hashCode()).array();
-        String base64 = Base64.encodeToString(hashData, Base64.DEFAULT);
+        String base64 = Base64.encodeToString(hashData, Base64.NO_PADDING | Base64.URL_SAFE).trim();
         return getTaskName() + "-" + base64;
     }
 

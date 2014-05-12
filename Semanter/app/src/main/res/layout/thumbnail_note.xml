@@ -12,7 +12,7 @@
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/thumbnail_note_progress"
+            android:id="@+id/thumbnail_note_image"
             android:src="@drawable/ic_progress_1"
             android:scaleType="centerCrop" />
 
@@ -31,6 +31,6 @@
         android:id="@+id/thumbnail_note_date"
         android:layout_gravity="center"
         android:textAppearance="?android:attr/textAppearanceSmall"
-        android:textColor="#ffffffff"/>
+        android:textColor="#000000"/>
 
 </FrameLayout>

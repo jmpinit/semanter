@@ -19,8 +19,8 @@ public class ReviewActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
 
         Intent intent = getIntent();
-        String notePath = intent.getStringExtra("note");
-        Note note = NoteFactory.noteFromPath(notePath);
+        String noteName = intent.getStringExtra("note");
+        Note note = NoteFactory.noteFromPath(NoteFactory.nameToDir(this, noteName).getPath());
 
         NoteView noteView = new NoteView(this);
         noteView.setNote(note);

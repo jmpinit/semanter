@@ -19,6 +19,7 @@ import us.semanter.app.vision.util.JSONable;
 public class Note implements JSONable {
     public final static String FIELD_NAME = "name";
     public final static String FIELD_DATE = "date";
+    public final static String FIELD_THUMBNAIL = "thumbnail";
     public final static String FIELD_TAGS = "tags";
     public final static String FIELD_RESULT = "result";
 
@@ -27,6 +28,7 @@ public class Note implements JSONable {
 
     private final String name;
     private final Date date;
+    private File thumbnail;
     private final Set<Tag>  tags;
     private Result result;
 
@@ -35,6 +37,7 @@ public class Note implements JSONable {
     public Note(String name, Date date, Set<Tag> tags) {
         this.name = name;
         this.date = new Date(date.getTime());
+        this.thumbnail = null;
         this.tags = new HashSet<Tag>(tags);
         this.result = null;
     }
@@ -42,6 +45,7 @@ public class Note implements JSONable {
     public Note(String name, Date date, List<Tag> tags) {
         this.name = name;
         this.date = new Date(date.getTime());
+        this.thumbnail = null;
         this.tags = new HashSet<Tag>(tags);
         this.result = null;
     }
@@ -50,9 +54,17 @@ public class Note implements JSONable {
         this(name, date, new HashSet<Tag>());
     }
 
+    public Note setThumbnail(File thumbnail) {
+        Note newNote = new Note(this.name, this.date, this.tags);
+        newNote.thumbnail = thumbnail;
+        newNote.result = result;
+        return newNote;
+    }
+
     public Note addTag(Tag tag) {
         Note newNote = new Note(this.name, this.date, this.tags);
         newNote.tags.add(tag);
+        newNote.thumbnail = thumbnail;
         newNote.result = result;
         return newNote;
     }
@@ -60,17 +72,20 @@ public class Note implements JSONable {
     public Note removeTag(Tag tag) {
         Note newNote = new Note(this.name, this.date, this.tags);
         newNote.tags.remove(tag);
+        newNote.thumbnail = thumbnail;
         newNote.result = result;
         return newNote;
     }
 
     public Note addResult(String parentName, Result res) {
         Note newNote = new Note(this.name, this.date, this.tags);
+        newNote.thumbnail = thumbnail;
 
         if(result == null)
             newNote.result = res;
         else
             newNote.result = result.add(parentName, res);
+
         return newNote;
     }
 
@@ -78,17 +93,11 @@ public class Note implements JSONable {
         return result.get(parentID, taskName);
     }
 
-    /*public Note addResult(String id, String path) {
-        Note newNote = new Note(this.name, this.date, this.tags);
-        newNote.result = result;
-        newNote.results.putString(id, path);
-        return newNote;
-    }*/
-
     public String getName() { return name; }
     public Date getDate() {
         return new Date(date.getTime());
     }
+    public File getThumbnail() { return thumbnail; }
 
     public Set<Tag> getTags() {
         return new HashSet<Tag>(tags);
@@ -207,6 +216,13 @@ public class Note implements JSONable {
 
         Date date = new Date(json.getLong(FIELD_DATE));
 
+        String thumbnailPath = json.getString(FIELD_THUMBNAIL);
+        File thumbnail;
+        if(thumbnailPath.equals(""))
+            thumbnail = null;
+        else
+            thumbnail = new File(thumbnailPath);
+
         Set<Tag> tags = new HashSet<Tag>();
         JSONObject tagJSON = json.getJSONObject(FIELD_TAGS);
         for(int i=0; tagJSON.has(""+i); i++)
@@ -222,6 +238,7 @@ public class Note implements JSONable {
 
         this.name = name;
         this.date = date;
+        this.thumbnail = thumbnail;
         this.tags = tags;
         this.result = result;
     }
@@ -232,6 +249,10 @@ public class Note implements JSONable {
 
         json.put(FIELD_NAME, name);
         json.put(FIELD_DATE, date.getTime());
+        if(thumbnail == null)
+            json.put(FIELD_THUMBNAIL, "");
+        else
+            json.put(FIELD_THUMBNAIL, thumbnail.getPath());
 
         JSONObject tagJSON = new JSONObject();
         int i = 0;

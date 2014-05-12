@@ -1,6 +1,7 @@
 package us.semanter.app.model;
 
 import android.content.Context;
+import android.net.Uri;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
@@ -8,6 +9,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -54,24 +56,13 @@ public class TagListAdapter extends ArrayAdapter<NoteModifier> {
             }
 
             // TODO task numbers as enum
-            ImageView progressImage = (ImageView) tagRow.findViewById(R.id.thumbnail_note_progress);
-            /*switch (note.getResultCount()) {
-                case 0:
-                    progressImage.setImageResource(R.drawable.ic_progress_1);
-                    break;
-                case 1:
-                    progressImage.setImageResource(R.drawable.ic_progress_2);
-                    break;
-                case 2:
-                    progressImage.setImageResource(R.drawable.ic_progress_3);
-                    break;
-                case 3:
-                    progressImage.setImageResource(R.drawable.ic_progress_4);
-                    break;
-                case 4:
-                    ((ViewSwitcher) tagRow.findViewById(R.id.thumbnail_note_switcher)).showNext();
-                    break;
-            }*/
+            ImageView thumbnailImage = (ImageView)tagRow.findViewById(R.id.thumbnail_note_image);
+
+            File thumbnail = note.getThumbnail();
+            if(thumbnail == null)
+                thumbnailImage.setImageResource(R.drawable.ic_progress_1);
+            else
+                thumbnailImage.setImageURI(Uri.parse(thumbnail.getPath()));
         }
 
         return tagRow;

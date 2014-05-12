@@ -32,9 +32,7 @@ public class Thumbnailer extends TaskNode {
         Imgproc.resize(source, thumbnail, new Size(thumbnail.width(), thumbnail.height()));
 
         // save in result tree
-        saveResult(new File(sourcePath), parentID, thumbnail);
-
-        dispatch(sourcePath);
+        dispatch(saveResult(new File(sourcePath), parentID, thumbnail).getPath());
     }
 
     @Override
