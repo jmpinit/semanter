@@ -1,5 +1,6 @@
 package us.semanter.app;
 
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -29,7 +30,6 @@ import us.semanter.app.model.Tag;
 import us.semanter.app.model.TagListener;
 import us.semanter.app.ui.TagView;
 import us.semanter.app.vision.VisionService;
-import us.semanter.app.vision.task.Normalizer;
 
 public class SearchActivity extends ActionBarActivity {
     private GridView noteList;
@@ -40,21 +40,7 @@ public class SearchActivity extends ActionBarActivity {
     private List<Note> notesInList;
 
     private final IntentFilter visionFilter = new IntentFilter(VisionService.ACTION_UPDATE);
-    private final BroadcastReceiver visionReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Log.d("SearchActivity", "I see an update of " + intent.getStringExtra(VisionService.EXTRA_SOURCE));
-
-            // FIXME testing
-            String taskName = intent.getStringExtra(VisionService.EXTRA_PIPE_NAME);
-            if(taskName.equals(Normalizer.TASK_NAME)) {
-                Intent imgIntent = new Intent();
-                imgIntent.setAction(Intent.ACTION_VIEW);
-                imgIntent.setDataAndType(Uri.parse("file://" + NoteFactory.getSourcePath(intent.getStringExtra(VisionService.EXTRA_SOURCE))), "image/*");
-                startActivity(imgIntent);
-            }
-        }
-    };
+    private BroadcastReceiver visionReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,6 +78,19 @@ public class SearchActivity extends ActionBarActivity {
                 startActivity(reviewIntent);*/
             }
         });
+
+        final Activity activity = this;
+        visionReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Log.d("SearchActivity", "I see an update of " + intent.getStringExtra(VisionService.EXTRA_SOURCE));
+
+                String notePath = intent.getStringExtra(VisionService.EXTRA_SOURCE);
+                Intent reviewIntent = new Intent(activity, ReviewActivity.class);
+                reviewIntent.putExtra("note", notePath);
+                startActivity(reviewIntent);
+            }
+        };
 
         startService(new Intent(this, VisionService.class));
         registerReceiver(visionReceiver, visionFilter);

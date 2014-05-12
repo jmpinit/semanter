@@ -27,7 +27,7 @@ public class NoteFactory {
     public final static String FILE_META_DATA = "meta.json";
     public final static String FILE_SOURCE = "source.png";
 
-    // TODO validate note directories and content (checkrep)g
+    // TODO validate note directories and content (checkrep)
 
     /**
      * @param sourcePath image filepath
@@ -37,8 +37,14 @@ public class NoteFactory {
         return new File(sourcePath).getParent();
     }
 
-    public static String getSourcePath(String notePath) {
-        return new File(notePath + "/" + new File(notePath).getName() + "-" + FILE_SOURCE).toString();
+    /**
+     * @param ctx context to use to get storage directory
+     * @param noteName name of note (like from note.getName())
+     * @param resource resource to obtain the path to
+     * @return path to the specified resource
+     */
+    public static String getPathTo(Context ctx, String noteName, String resource) {
+        return new File(getNoteDir(ctx, noteName) + "/" + noteName + "-" + resource).toString();
     }
 
     /**

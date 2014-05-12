@@ -3,45 +3,29 @@ package us.semanter.app;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import us.semanter.app.model.Note;
-import us.semanter.app.ui.VisionView;
+import us.semanter.app.model.NoteFactory;
+import us.semanter.app.ui.review.NoteView;
 
 public class ReviewActivity extends ActionBarActivity {
     private Note noteToReview;
-    private VisionView visionView;
+    private NoteView noteView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         Intent intent = getIntent();
-        try {
-            JSONObject noteJSON = new JSONObject(intent.getStringExtra(getString(R.string.param_note)));
-            noteToReview = new Note(noteJSON);
-        } catch(JSONException e) {
-            e.printStackTrace();
-            Log.e("ReviewActivity", "Couldn't construct note because of JSONException");
-            finish();
-        }
+        String notePath = intent.getStringExtra("note");
+        Note note = NoteFactory.noteFromPath(notePath);
 
+        NoteView noteView = new NoteView(this);
+        noteView.setNote(note);
 
-
-        /*String taskName = intent.getStringExtra("task");
-        if(taskName.equals(VisionPipeline.Task.FLATTEN.getName())) {
-            setContentView(R.layout.review_flatten);
-            visionView = (VisionView)findViewById(R.id.flatten_reviewer);
-            //visionView.review(noteToReview.getResult(VisionPipeline.Task.FLATTEN.getName()));
-        } else {
-            Log.e("ReviewActivity", "unrecognized task.");
-            finish();
-        }*/
+        setContentView(noteView);
     }
 
     @Override

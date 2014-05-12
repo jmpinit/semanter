@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
@@ -15,6 +14,17 @@ public abstract class VisionView extends SurfaceView implements SurfaceHolder.Ca
 
     public VisionView(Context ctx, AttributeSet attrSet) {
         super(ctx, attrSet);
+
+        mContext = ctx;
+
+        SurfaceHolder holder = getHolder();
+        holder.addCallback(this);
+
+        setFocusable(true);
+    }
+
+    public VisionView(Context ctx) {
+        super(ctx);
 
         mContext = ctx;
 
@@ -47,14 +57,6 @@ public abstract class VisionView extends SurfaceView implements SurfaceHolder.Ca
         updater = new VisionViewUpdater(this, holder);
         updaterThread = new Thread(updater);
         updaterThread.start();
-    }
-
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        return super.onTouchEvent(event);
-
-        // TODO pinch to zoom
-        // TODO single finger panning
     }
 
     class VisionViewUpdater implements Runnable {
