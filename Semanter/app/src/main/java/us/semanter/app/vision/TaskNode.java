@@ -1,13 +1,18 @@
 package us.semanter.app.vision;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.util.Log;
 
+import org.opencv.core.Mat;
+
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Vector;
 
+import us.semanter.app.model.Note;
 import us.semanter.app.model.NoteFactory;
 
 /**
@@ -18,8 +23,12 @@ import us.semanter.app.model.NoteFactory;
 public abstract class TaskNode {
     protected static final Bitmap.Config bmpConfig = Bitmap.Config.ARGB_8888;
 
+    private Context context;
     private final List<NodeListener> listeners;
+    private final TaskNode parent;
     private final List<TaskNode> children;
+
+    private boolean used; // flag for immutability after first usage
 
     // identifier for this specific node.
     // important for referencing corrected tasks
@@ -28,28 +37,61 @@ public abstract class TaskNode {
     private boolean hashCached;
     private int hash;
 
-    public TaskNode(List<TaskNode> children) {
+    public TaskNode(Context ctx, TaskNode parent, List<TaskNode> children) {
+        this.context = ctx;
+        this.parent = parent;
         this.listeners = new Vector<NodeListener>();
         this.children = new ArrayList<TaskNode>(children);
 
         hashCached = false;
 
+        used = false;
+
         // must be called after adding children
         uid = generateUID();
     }
 
-    public TaskNode() {
-        this(new ArrayList<TaskNode>(0));
+    public TaskNode(Context ctx, TaskNode parent, TaskNode task) {
+        this(ctx, parent, Arrays.asList(new TaskNode[]{task}));
     }
+
+    public TaskNode(Context ctx, TaskNode parent) {
+        this(ctx, parent, new ArrayList<TaskNode>(0));
+    }
+
+    public void addChild(TaskNode child) {
+        if(used)
+            throw new RuntimeException("Children cannot be added to TaskNode after it's first used, to preserve immutability.");
+        else
+            this.children.add(child);
+    }
+
+    public void addChildren(List<TaskNode> children) {
+        if(used)
+            throw new RuntimeException("Children cannot be added to TaskNode after it's first used, to preserve immutability.");
+        else
+            this.children.addAll(children);    }
 
     /**
      * Take an image, operate on it, and then pass the result to the children of the node.
      * @param sourcePath path of the image to operate on. It is assumed that the parent directory is for the note
      *                   the image is attached to.
      */
-    public abstract void operateOn(String sourcePath);
+    public abstract void operateOn(String parentID, String sourcePath);
+
+    public void saveResult(File source, String parentID, Mat result) {
+        File resultPath = getResultPath(source.toString());
+        VisionUtil.saveMat(result, bmpConfig, resultPath.getPath());
+
+        Log.d("Vision", getUID() + " operated and produced " + resultPath + " after " + parentID);
+
+        Note note = NoteFactory.noteFromPath(source.getPath());
+        Note moddedNote = note.addResult(parentID, new Note.Result(getUID(), getTaskName(), resultPath, null));
+        NoteFactory.saveMeta(context, moddedNote);
+    }
 
     protected void dispatch(String outputPath) {
+        used = true;
         dispatchEvents(getTaskName(), NoteFactory.getNotePath(outputPath));
         dispatchTasks(outputPath);
     }
@@ -66,10 +108,16 @@ public abstract class TaskNode {
     /**
      * @param outputPath the path of the image output of this node's operation.
      */
-    private void dispatchTasks(String outputPath) {
+    private void dispatchTasks(final String outputPath) {
         Log.d("TaskNode", "Dispatching tasks.");
-        for(TaskNode child: children)
-            child.operateOn(outputPath);
+        for(final TaskNode child: children) {
+            (new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    child.operateOn(uid, outputPath);
+                }
+            })).start();
+        }
     }
 
     // add listener to this node. notified on op completion.
@@ -119,8 +167,9 @@ public abstract class TaskNode {
             return hash;
         } else {
             int hash = getTaskName().hashCode();
-            for (TaskNode child : children)
-                hash ^= child.hashCode();
+
+            if(parent != null)
+                hash ^= parent.hashCode();
 
             // cache the result (safe because the tree is immutable)
             this.hash = hash;

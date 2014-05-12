@@ -9,10 +9,9 @@ import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 
-import java.util.Arrays;
-
 import us.semanter.app.vision.task.Flattener;
 import us.semanter.app.vision.task.Normalizer;
+import us.semanter.app.vision.task.Thumbnailer;
 
 /**
  * Processes images through a vision pipeline, saves the results, and notifies bound listeners.
@@ -79,7 +78,7 @@ public class VisionService extends IntentService {
     private void handleActionImport(final String sourcePath) {
         while(!cvReady) {}
         Log.d("VisionService", "Importing " + sourcePath);
-        rootOperation.operateOn(sourcePath);
+        rootOperation.operateOn(null, sourcePath);
     }
 
     private void handleActionCorrect(String sourcePath, String pipeName, String alternative) {
@@ -106,9 +105,20 @@ public class VisionService extends IntentService {
                 {
                     Log.i("VisionService", "OpenCV loaded successfully");
 
-                    // construct the initial operation tree carried out by the service.
-                    TaskNode normalize = new Normalizer();
-                    TaskNode flatten = new Flattener(Arrays.asList(new TaskNode[] {normalize}));
+                    // construct the initial operations carried out by the service
+                    Context ctx = getApplicationContext();
+
+                    TaskNode flatten = new Flattener(getApplicationContext(), null);
+                    TaskNode flattenThumbnail = new Thumbnailer(ctx, flatten);
+
+                    TaskNode normalize = new Normalizer(ctx, flatten);
+                    TaskNode normalizeThumbnail = new Thumbnailer(ctx, normalize);
+
+                    // connect operations
+                    flatten.addChild(normalize);
+                    flatten.addChild(flattenThumbnail);
+
+                    normalize.addChild(normalizeThumbnail);
 
                     rootOperation = flatten;
 

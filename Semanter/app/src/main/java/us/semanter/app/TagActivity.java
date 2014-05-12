@@ -26,7 +26,7 @@ public class TagActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tag);
 
-        List<Note> notes = NoteFactory.getAllNotes(getExternalFilesDir(null).getPath() + "/notes");
+        List<Note> notes = NoteFactory.getAllNotes(this);
 
         noteModifiers = new ArrayList<NoteModifier>();
         for(Note note: notes)

@@ -46,7 +46,7 @@ public class NoteView extends VisionView {
 
         this.note = note;
 
-        String sourcePath = NoteFactory.getPathTo(getContext(), note.getName(), NoteFactory.FILE_SOURCE);
+        String sourcePath = NoteFactory.getPathToResource(getContext(), note.getName(), NoteFactory.FILE_SOURCE);
         noteImage = BitmapFactory.decodeFile(sourcePath);
     }
 

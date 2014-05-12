@@ -1,5 +1,6 @@
 package us.semanter.app.vision.task;
 
+import android.content.Context;
 import android.util.Log;
 
 import org.opencv.core.Core;
@@ -14,6 +15,7 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -46,15 +48,15 @@ public class Flattener extends TaskNode {
     private static final int SQUARE_SIZE = 25000; // FIXME train on this somehow
     private static final double THRESHOLD_COS = 0.05; // FIXME train on this somehow
 
-    public Flattener() {
-        super();
+    public Flattener(Context ctx, TaskNode parent) {
+        super(ctx, parent);
+    }
+    public Flattener(Context ctx, TaskNode parent, TaskNode task) { super(ctx, parent, task); }
+    public Flattener(Context ctx, TaskNode parent, List<TaskNode> children) {
+        super(ctx, parent, children);
     }
 
-    public Flattener(List<TaskNode> children) {
-        super(children);
-    }
-
-    public void operateOn(String sourcePath) {
+    public void operateOn(String parentID, String sourcePath) {
         Mat source = VisionUtil.matFromFile(sourcePath);
 
         // find paper
@@ -62,7 +64,7 @@ public class Flattener extends TaskNode {
 
         if(squares.size() == 0) {
             // make no change
-            VisionUtil.saveMat(source, bmpConfig, getResultPath(sourcePath).toString());
+            saveResult(new File(sourcePath), parentID, source);
         } else {
             // get largest and assume it is the notes
             Polygon notePage = Polygon.largest(squares);
@@ -91,9 +93,7 @@ public class Flattener extends TaskNode {
             Mat croppedRef = new Mat(flattened, noteRegion);
 
             // save result
-            VisionUtil.saveMat(croppedRef, bmpConfig, getResultPath(sourcePath).toString());
-
-            Log.d("Flattener", "Saved result to " + getResultPath(sourcePath));
+            saveResult(new File(sourcePath), parentID, croppedRef);
         }
 
         dispatch(getResultPath(sourcePath).toString());

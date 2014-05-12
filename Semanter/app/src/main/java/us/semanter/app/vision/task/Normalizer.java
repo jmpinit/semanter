@@ -1,11 +1,14 @@
 package us.semanter.app.vision.task;
 
+import android.content.Context;
+
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
+import java.io.File;
 import java.util.List;
 
 import us.semanter.app.vision.TaskNode;
@@ -17,13 +20,15 @@ public class Normalizer extends TaskNode {
     // operation parameters (potentially subject to correction)
     private Mat CLOSE_KERNEL;
 
-    public Normalizer() {
-        super();
+    public Normalizer(Context ctx, TaskNode parent) {
+        super(ctx, parent);
         init();
     }
 
-    public Normalizer(List<TaskNode> children) {
-        super(children);
+    public Normalizer(Context ctx, TaskNode parent, TaskNode task) { super(ctx, parent, task); }
+
+    public Normalizer(Context ctx, TaskNode parent, List<TaskNode> children) {
+        super(ctx, parent, children);
         init();
     }
 
@@ -31,7 +36,7 @@ public class Normalizer extends TaskNode {
         CLOSE_KERNEL = Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(11, 11), new Point(-1, -1));
     }
 
-    public void operateOn(String sourcePath) {
+    public void operateOn(String parentID, String sourcePath) {
         Mat source = VisionUtil.matFromFile(sourcePath);
         Imgproc.cvtColor(source, source, Imgproc.COLOR_RGBA2RGB);
 
@@ -64,7 +69,8 @@ public class Normalizer extends TaskNode {
         Log.d("Normalizer", CvType.CV_8UC3 + " versus " + masked.type());
         Photo.fastNlMeansDenoisingColored(masked, masked);*/
 
-        VisionUtil.saveMat(normalized, bmpConfig, getResultPath(sourcePath).toString());
+        // save result
+        saveResult(new File(sourcePath), parentID, normalized);
 
         dispatch(sourcePath);
     }

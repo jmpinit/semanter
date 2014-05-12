@@ -8,7 +8,6 @@ import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.ViewSwitcher;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -51,7 +50,7 @@ public class NoteGridAdapter extends BaseAdapter {
 
             // TODO task numbers as enum
             ImageView progressImage = (ImageView) thumbnailView.findViewById(R.id.thumbnail_note_progress);
-            switch (note.getResultCount()) {
+            /*switch (note.getResultCount()) {
                 case 0:
                     progressImage.setImageResource(R.drawable.ic_progress_1);
                     break;
@@ -67,7 +66,7 @@ public class NoteGridAdapter extends BaseAdapter {
                 case 4:
                     ((ViewSwitcher) thumbnailView.findViewById(R.id.thumbnail_note_switcher)).showNext();
                     break;
-            }
+            }*/
         } else {
             thumbnailView.setVisibility(View.GONE);
         }
@@ -82,11 +81,12 @@ public class NoteGridAdapter extends BaseAdapter {
 
     @Override
     public boolean isEnabled(int position) {
-        if(position < notes.size()) {
+        /*if(position < notes.size()) {
             return notes.get(position).getResultCount() > 0;
         } else {
             return false;
-        }
+        }*/
+        return true;
     }
 
     @Override

@@ -24,6 +24,7 @@ import java.util.UUID;
 import us.semanter.app.util.ExceptionUtility;
 
 public class NoteFactory {
+    private static File noteDirectory;
     public final static String FILE_META_DATA = "meta.json";
     public final static String FILE_SOURCE = "source.png";
 
@@ -43,8 +44,21 @@ public class NoteFactory {
      * @param resource resource to obtain the path to
      * @return path to the specified resource
      */
-    public static String getPathTo(Context ctx, String noteName, String resource) {
+    public static String getPathToResource(Context ctx, String noteName, String resource) {
         return new File(getNoteDir(ctx, noteName) + "/" + noteName + "-" + resource).toString();
+    }
+
+    /**
+     * Setup persistent storage for notes.
+     * @param ctx
+     */
+    public static void initStorage(Context ctx) {
+        File noteBaseDir = getNotesDir(ctx);
+
+        // create the folders if they don't exist
+
+        if(!noteBaseDir.exists())
+            noteBaseDir.mkdir();
     }
 
     /**
@@ -67,9 +81,6 @@ public class NoteFactory {
         File noteDir = new File(noteBaseDir + "/" + noteName);
 
         // create the folders if they don't exist
-
-        if(!noteBaseDir.exists())
-            noteBaseDir.mkdir();
 
         if(!noteDir.exists())
             noteDir.mkdir();
@@ -109,13 +120,13 @@ public class NoteFactory {
             JSONObject json = new JSONObject(getStringFromFile(getNoteItem(noteDir, FILE_META_DATA).toString()));
             return new Note(json);
         } catch(Exception e) {
-            ExceptionUtility.printException(NoteFactory.class, e, "Couldn't create new note from meta file.");
+            ExceptionUtility.printException(NoteFactory.class, e, "Couldn't create new note from meta file " + getNoteItem(noteDir, FILE_META_DATA) + ".");
             return null;
         }
     }
 
-    public static List<Note> getAllNotes(String rootPath) {
-        File rootDir = new File(rootPath);
+    public static List<Note> getAllNotes(Context ctx) {
+        File rootDir = getNotesDir(ctx);
 
         if(!rootDir.isDirectory()) {
             Log.e("NoteFactory", "Can't get multiple notes from a file. Must be directory.");
@@ -127,7 +138,9 @@ public class NoteFactory {
         for(File file : files) {
             Log.d("NoteFactory", "file " + file);
             if(file.isDirectory()) {
-                notes.add(noteFromPath(file.getPath()));
+                Note note = noteFromPath(file.getPath());
+                if(note != null)
+                    notes.add(note);
                 Log.d("NoteFactory", "File to read into note is " + file);
             }
         }
@@ -136,11 +149,20 @@ public class NoteFactory {
     }
 
     public static File getNoteDir(Context ctx, String noteName) {
-        return new File(ctx.getExternalFilesDir(null) + "/notes/" + noteName);
+        return new File(getNotesDir(ctx) + "/" + noteName);
     }
 
     public static File getNotesDir(Context ctx) {
-        return new File(ctx.getExternalFilesDir(null) + "/notes");
+        if(noteDirectory == null) {
+            File storage = ctx.getExternalFilesDir(null);
+
+            if(storage == null)
+                storage = ctx.getFilesDir();
+
+            return new File(storage + "/notes");
+        } else {
+            return noteDirectory;
+        }
     }
 
     public static void saveMeta(Context ctx, Note note) {

@@ -7,7 +7,6 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.ViewSwitcher;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -56,7 +55,7 @@ public class TagListAdapter extends ArrayAdapter<NoteModifier> {
 
             // TODO task numbers as enum
             ImageView progressImage = (ImageView) tagRow.findViewById(R.id.thumbnail_note_progress);
-            switch (note.getResultCount()) {
+            /*switch (note.getResultCount()) {
                 case 0:
                     progressImage.setImageResource(R.drawable.ic_progress_1);
                     break;
@@ -72,7 +71,7 @@ public class TagListAdapter extends ArrayAdapter<NoteModifier> {
                 case 4:
                     ((ViewSwitcher) tagRow.findViewById(R.id.thumbnail_note_switcher)).showNext();
                     break;
-            }
+            }*/
         }
 
         return tagRow;
@@ -85,10 +84,11 @@ public class TagListAdapter extends ArrayAdapter<NoteModifier> {
 
     @Override
     public boolean isEnabled(int position) {
-        if (position < getCount()) {
+        return true;
+        /*if (position < getCount()) {
             return getItem(position).getNote().getResultCount() > 0;
         } else {
             return false;
-        }
+        }*/
     }
 }

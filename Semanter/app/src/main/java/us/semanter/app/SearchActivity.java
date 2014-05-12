@@ -89,19 +89,19 @@ public class SearchActivity extends ActionBarActivity {
     private void filterNotes() {
         Set<Tag> filterTags = tags.getTags();
 
-        for(Note note: notes) {
+        for (Note note : notes) {
             boolean visible = true;
 
             Set<Tag> noteTags = note.getTags();
-            for(Tag tag: filterTags) {
-                if(!noteTags.contains(tag)) {
+            for (Tag tag : filterTags) {
+                if (!noteTags.contains(tag)) {
                     visible = false;
                     break;
                 }
             }
 
-            if(visible) {
-                if(!notesInList.contains(note))
+            if (visible) {
+                if (!notesInList.contains(note))
                     notesInList.add(note);
             } else {
                 notesInList.remove(note);
@@ -112,13 +112,17 @@ public class SearchActivity extends ActionBarActivity {
     }
 
     private void loadNotes() {
+        NoteFactory.initStorage(this);
+
         // TODO only on change reload all notes
+
         if(notes == null)
             notes = new ArrayList<Note>();
         else
             notes.clear();
 
-        notes = NoteFactory.getAllNotes(getExternalFilesDir(null).getPath() + "/notes");
+        //notes = NoteFactory.getAllNotes(getExternalFilesDir(null).getPath() + "/notes");
+        notes = NoteFactory.getAllNotes(this);
 
         notesInList.clear();
         notesInList.addAll(notes);
