@@ -1,7 +1,6 @@
 package us.semanter.app.model;
 
 import android.os.Bundle;
-import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -12,9 +11,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import us.semanter.app.vision.VisionResultFactory;
 import us.semanter.app.vision.util.JSONable;
-import us.semanter.app.vision.util.VisionResult;
 
 /**
  * Immutable in-memory representation of note
@@ -62,21 +59,6 @@ public class Note implements JSONable {
         return newNote;
     }
 
-    public Note addResult(VisionResult result) {
-        try {
-            Note newNote = new Note(this.name, this.date, this.tags);
-            newNote.results = results;
-            newNote.results.putString(result.getTaskName(), result.toJSON().toString());
-            newNote.resultCount = resultCount + 1;
-            return newNote;
-        } catch(JSONException e) {
-            e.printStackTrace();
-            Log.e("Note", "Couldn't add result because of JSON exception.");
-        }
-
-        return null;
-    }
-
     public int getResultCount() {
         return resultCount;
     }
@@ -88,17 +70,6 @@ public class Note implements JSONable {
 
     public Set<Tag> getTags() {
         return new HashSet<Tag>(tags);
-    }
-
-    public VisionResult getResult(String name) {
-        try {
-            return VisionResultFactory.fromJSON(new JSONObject(results.getString(name)));
-        } catch(JSONException e) {
-            e.printStackTrace();
-            Log.e("Note", "Couldn't get result because of JSONException.");
-        }
-
-        return null;
     }
 
     /*

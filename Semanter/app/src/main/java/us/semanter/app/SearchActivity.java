@@ -1,6 +1,5 @@
 package us.semanter.app;
 
-import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -65,30 +64,21 @@ public class SearchActivity extends ActionBarActivity {
         loadNotes();
 
         final Intent reviewIntent = new Intent(this, ReviewActivity.class);
-        final Context activityContext = this;
+        final Context ctx = this;
         noteList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-                /*try {
-                    reviewIntent.putExtra(getString(R.string.param_note), ((Note) noteGridAdapter.getItem(position)).toJSON().toString());
-                } catch(JSONException e) {
-                    e.printStackTrace();
-                    Log.e("SearchActivity", "Couldn't send note to ReviewActivity because of JSONException.");
-                }
-                reviewIntent.putExtra("task", VisionPipeline.Task.FLATTEN.getName());
-                startActivity(reviewIntent);*/
+                String notePath = reviewIntent.getStringExtra(VisionService.EXTRA_SOURCE);
+                Intent reviewIntent = new Intent(ctx, ReviewActivity.class);
+                reviewIntent.putExtra("note", notePath);
+                startActivity(reviewIntent);
             }
         });
 
-        final Activity activity = this;
         visionReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 Log.d("SearchActivity", "I see an update of " + intent.getStringExtra(VisionService.EXTRA_SOURCE));
-
-                String notePath = intent.getStringExtra(VisionService.EXTRA_SOURCE);
-                Intent reviewIntent = new Intent(activity, ReviewActivity.class);
-                reviewIntent.putExtra("note", notePath);
-                startActivity(reviewIntent);
+                loadNotes();
             }
         };
 

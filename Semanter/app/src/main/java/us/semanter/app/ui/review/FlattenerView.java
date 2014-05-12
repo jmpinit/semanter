@@ -2,33 +2,18 @@ package us.semanter.app.ui.review;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.AttributeSet;
 
-import org.opencv.core.Point;
-
-import java.util.List;
-
 import us.semanter.app.ui.VisionView;
-import us.semanter.app.vision.result.FlattenerResult;
-import us.semanter.app.vision.result.OutlineGuess;
-import us.semanter.app.vision.util.VisionResult;
 
-public class FlattenerView extends VisionView implements Reviewer {
-    private FlattenerResult result;
+public class FlattenerView extends VisionView {
     private Bitmap prior;
 
     public FlattenerView(Context ctx, AttributeSet attrSet) {
         super(ctx, attrSet);
-    }
-
-    @Override
-    public void review(VisionResult result) {
-        this.result = (FlattenerResult)result;
-        prior = BitmapFactory.decodeFile(result.getPrior().getPath());
     }
 
     @Override
@@ -37,7 +22,7 @@ public class FlattenerView extends VisionView implements Reviewer {
         p.setColor(Color.MAGENTA);
         p.setStrokeWidth(4);
 
-        canvas.drawBitmap(prior, 0, 0, p);
+        /*canvas.drawBitmap(prior, 0, 0, p);
 
         // draw outlines of paper
         for(OutlineGuess outline: result.getOutlines()) {
@@ -53,6 +38,6 @@ public class FlattenerView extends VisionView implements Reviewer {
             } catch(Exception e) {
                 e.printStackTrace();
             }
-        }
+        }*/
     }
 }
