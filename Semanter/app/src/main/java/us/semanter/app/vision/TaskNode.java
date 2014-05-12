@@ -2,11 +2,13 @@ package us.semanter.app.vision;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.util.Base64;
 import android.util.Log;
 
 import org.opencv.core.Mat;
 
 import java.io.File;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -49,6 +51,7 @@ public abstract class TaskNode {
 
         // must be called after adding children
         uid = generateUID();
+        Log.d("TaskNode", "UID is " + uid);
     }
 
     public TaskNode(Context ctx, TaskNode parent, TaskNode task) {
@@ -139,7 +142,9 @@ public abstract class TaskNode {
     // must be called after the node is constructed, because it depends
     // on the structure of the tree.
     private String generateUID() {
-        return getTaskName() + "-" + hashCode();
+        byte[] hashData = ByteBuffer.allocate(4).putInt(hashCode()).array();
+        String base64 = Base64.encodeToString(hashData, Base64.DEFAULT);
+        return getTaskName() + "-" + base64;
     }
 
     /*
